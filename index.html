@@ -137,15 +137,17 @@ $("mp").onclick=function(e){e.stopPropagation();nativeToggle()};
 $("pl").onclick=function(){if($("pl").className=="mini")full()};
 $("bv").onclick=function(){fav(cur.id,cur.t)};
 $("bz").onclick=function(){var f=$("pw");(f.requestFullscreen||f.webkitRequestFullscreen||function(){}).call(f)};
-var M={ct:0,du:0,ps:-1},MC=0,LC="-";
+var M={ct:0,du:0,ps:-1},MC=0,AC=0,LC="-";
 function fr(){return $("pw").querySelector("iframe")}
-function cmd(f,a){var r=fr();if(r)r.contentWindow.postMessage(JSON.stringify({event:"command",func:f,args:a||[]}),"*")}
+function cmd(f,a){var r=fr();if(!r)return;r.contentWindow.postMessage(JSON.stringify({event:"command",func:f,args:a||[]}),"*");var c={playVideo:"play",pauseVideo:"pause",seekTo:"seek"}[f];if(c)r.contentWindow.postMessage({vm:1,c:c,s:a&&a[0]},"*")}
 function listen(){var r=fr();if(r)r.contentWindow.postMessage(JSON.stringify({event:"listening",id:1,channel:"widget"}),"*")}
-window.addEventListener("message",function(e){var r=fr();if(!r||e.source!==r.contentWindow||typeof e.data!="string")return;
+window.addEventListener("message",function(e){var r=fr();if(!r||e.source!==r.contentWindow)return;
+if(e.data&&e.data.vmst){AC++;M.ct=e.data.ct;if(e.data.du)M.du=e.data.du;if(!MC){var o=M.ps;M.ps=e.data.ps;if(o!=e.data.ps)st({data:e.data.ps})}return}
+if(typeof e.data!="string")return;
 try{var d=JSON.parse(e.data);MC++;var i=d.info;if(!i)return;
 if(d.event=="onStateChange"&&typeof i=="number")M.ps=i;
 if(typeof i=="object"){if(i.currentTime!=null)M.ct=i.currentTime;if(i.duration)M.du=i.duration;if(i.playerState!=null)M.ps=i.playerState}}catch(x){}});
-setInterval(function(){$("dg").textContent="Diagnóstico: estado "+M.ps+" · "+fmt(Math.floor(M.ct||0))+" / "+fmt(Math.floor(M.du||0))+" · mensagens "+MC+" · último comando: "+LC},1000);
+setInterval(function(){$("dg").textContent="Diagnóstico: estado "+M.ps+" · "+fmt(Math.floor(M.ct||0))+" / "+fmt(Math.floor(M.du||0))+" · mensagens "+MC+" · agente "+AC+" · último comando: "+LC},1000);
 window.nativeToggle=function(f){LC="toggle "+f;if(!cur)return;var pl=f===undefined?M.ps!=1:f;if(pl){want=true;a.play().catch(function(){});cmd("playVideo")}else{want=false;cmd("pauseVideo")}};
 window.nativeNext=function(){LC="próximo";if(Q&&Q.i+1<Q.l.length){Q.i++;var n=Q.l[Q.i];play(n.id,n.t)}};
 window.nativePrev=function(){LC="anterior";if(M.ct>5||!Q||Q.i<1)cmd("seekTo",[0,true]);else{Q.i--;var n=Q.l[Q.i];play(n.id,n.t)}};
