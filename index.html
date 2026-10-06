@@ -44,6 +44,9 @@ nav button.on{color:var(--ac)}
 .bt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
 .mini .fo,.full .mo{display:none}
 #msg{position:fixed;left:16px;right:16px;bottom:calc(140px + var(--sb));z-index:40;background:#efeaf7;color:#17102e;padding:11px 14px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center}
+.pip main,.pip nav,.pip #tp,.pip #pc,.pip #msg{display:none!important}
+.pip #pl.full,.pip #pl.mini{display:flex;top:0;bottom:0;left:0;right:0;height:auto;padding:0;border:0;border-radius:0}
+.pip #pw{width:100%;height:100%;aspect-ratio:auto;pointer-events:auto}
 </style></head><body>
 <main>
 <section class="tab on" id="tb"><h1>Buscar</h1>
@@ -102,12 +105,12 @@ function play(id,t){cur={id:id,t:t||id};$("pt").textContent=cur.t;full();want=tr
 if(!(window.YT&&YT.Player)){pend={id:id,t:t};return}pend=null;
 kill();{P=new YT.Player("yt",{videoId:id,host:S.chr?"https://www.yout"+S.chr+"ube.com":undefined,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:function(e){e.target.getIframe().allow="autoplay; encrypted-media; picture-in-picture; fullscreen"},onStateChange:st}})}
 setMeta();if(!t)fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)).then(function(r){return r.json()}).then(function(j){if(cur&&cur.id==id)setT(j.title)}).catch(function(){})}
-function st(e){if(e.data==1){want=true;a.play().catch(function(){})}
+function st(e){if(window.Android)try{Android.setPlaying(e.data==1||e.data==3)}catch(x){}if(e.data==1){want=true;a.play().catch(function(){})}
 else if(e.data==2&&document.hidden&&want)setTimeout(function(){P.playVideo()},250);
 else if(e.data==2||e.data==0){want=false}}
 document.addEventListener("visibilitychange",function(){if(document.hidden&&want&&P)[300,1200,3000].forEach(function(t){setTimeout(function(){if(document.hidden&&want)P.playVideo()},t)})});
 function kill(){try{if(P&&P.destroy)P.destroy()}catch(e){}P=null;$("pw").innerHTML='<div id="yt"></div>'}
-function fechar(){want=false;cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
+function fechar(){want=false;if(window.Android)try{Android.setPlaying(false)}catch(x){}cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
 try{a.pause()}catch(e){}kill();
 try{navigator.mediaSession.metadata=null}catch(e){}}
 $("bb").onclick=function(e){e.stopPropagation();mini()};$("bm").onclick=function(e){e.stopPropagation();fechar()};$("mx").onclick=function(e){e.stopPropagation();fechar()};
@@ -115,6 +118,7 @@ $("mp").onclick=function(e){e.stopPropagation();if(P.getPlayerState()==1){want=f
 $("pl").onclick=function(){if($("pl").className=="mini")full()};
 $("bv").onclick=function(){fav(cur.id,cur.t)};
 $("bz").onclick=function(){var f=$("pw");(f.requestFullscreen||f.webkitRequestFullscreen||function(){}).call(f)};
+window.onPip=function(b){document.body.classList.toggle("pip",b)};
 /* ---- ajustes ---- */
 $("ks").value=S.keys.join("\n");$("ch").value=S.chr;
 $("ks").onchange=function(){S.keys=this.value.split("\n").map(function(k){return k.trim()}).filter(Boolean);save()};
