@@ -47,6 +47,11 @@ nav button.on{color:var(--ac)}
 .pip main,.pip nav,.pip #tp,.pip #pc,.pip #msg{display:none!important}
 .pip #pl.full,.pip #pl.mini{display:flex;top:0;bottom:0;left:0;right:0;height:auto;padding:0;border:0;border-radius:0}
 .pip #pw{width:100%;height:100%;aspect-ratio:auto;pointer-events:auto}
+.ch{display:inline-block;padding:8px 14px;margin:4px 6px 4px 0;border-radius:20px;border:1px solid var(--line);background:var(--card);font-size:14px}
+.ch.on{background:var(--ac);color:#17102e;border-color:var(--ac);font-weight:700}
+#sh{position:fixed;inset:0;z-index:50;background:#0009;display:none;align-items:flex-end}
+#shb{background:var(--card);width:100%;padding:18px 18px calc(18px + var(--sb));border-radius:22px 22px 0 0}
+#shb input{margin:12px 0 4px}
 </style></head><body>
 <main>
 <section class="tab on" id="tb"><h1>Buscar</h1>
@@ -61,13 +66,15 @@ nav button.on{color:var(--ac)}
 </main>
 <div id="pl"><div id="tp" class="fo"><button id="bb">‹ Voltar</button></div><div id="pw"><div id="yt"></div></div>
 <div id="pc"><div id="pt"></div>
-<div class="fo bt"><button id="bm">Parar e fechar</button><button id="bz">Tela cheia</button><button id="bv">Favoritar</button></div>
+<div class="fo bt"><button id="bm">Parar e fechar</button><button id="bz">Tela cheia</button><button id="bp">Miniatura</button><button id="bv">Favoritar</button></div>
 <button class="mo x" id="mp">⏯</button><button class="mo x" id="mx">✕</button></div></div>
+<div id="sh"><div id="shb"><b>Salvar em qual playlist?</b><div id="shl" style="margin-top:8px"></div><input id="shn" placeholder="Ou crie uma nova playlist"><button class="pri" id="shk">Salvar</button></div></div>
 <div id="msg"></div>
 <nav><button data-t="b" class="on"><span>⌕</span>Buscar</button><button data-t="f"><span>★</span>Favoritos</button><button data-t="a"><span>⚙</span>Ajustes</button></nav>
 <script>
 var $=function(i){return document.getElementById(i)},S={favs:[],keys:[],chr:""},R=[],cur=null,want=false,P=null,pend=null;
 try{Object.assign(S,JSON.parse(localStorage.getItem("vm")||"{}"))}catch(e){}
+var Q=null,fc="";
 function save(){try{localStorage.setItem("vm",JSON.stringify(S))}catch(e){msg("Não foi possível salvar neste navegador.")}}
 function msg(t){var e=$("msg");e.textContent=t;e.style.opacity=1;clearTimeout(msg.t);msg.t=setTimeout(function(){e.style.opacity=0},3800)}
 function dec(s){var t=document.createElement("textarea");t.innerHTML=s;return t.value}
@@ -75,11 +82,23 @@ function pid(t){t=(t||"").trim();var m=t.match(/[?&]v=([\w-]{11})/)||t.match(/yo
 function tab(n){document.querySelectorAll(".tab").forEach(function(e){e.classList.toggle("on",e.id=="t"+n)});document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t==n)});if(n=="f")favs();if(cur&&$("pl").className=="full")mini()}
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){tab(b.dataset.t)}});
 function item(id,t,sub,x){var d=document.createElement("div");d.className="item";d.innerHTML='<img loading="lazy" alt=""><div class="i"><b></b><small></small></div>';
-d.querySelector("img").src="https://i.ytimg.com/vi/"+id+"/mqdefault.jpg";d.querySelector("b").textContent=t;d.querySelector("small").textContent=sub||"";d.onclick=function(){play(id,t)};
-if(x){var b=document.createElement("button");b.className="x";b.textContent=x.l;b.onclick=function(e){e.stopPropagation();x.f()};d.appendChild(b)}return d}
-function favs(){var b=$("fl");b.innerHTML="";if(!S.favs.length){b.innerHTML='<div class="empty">Nenhum favorito ainda. Toque na ☆ de um resultado ou em Favoritar no player.</div>';return}
-S.favs.forEach(function(f,i){b.appendChild(item(f.id,f.t,"",{l:"✕",f:function(){S.favs.splice(i,1);save();favs()}}))})}
-function fav(id,t){if(!id)return;if(S.favs.some(function(f){return f.id==id}))return msg("Esse vídeo já está nos favoritos.");S.favs.push({id:id,t:t||id});save();msg("Favoritado.")}
+d.querySelector("img").src="https://i.ytimg.com/vi/"+id+"/mqdefault.jpg";d.querySelector("b").textContent=t;d.querySelector("small").textContent=sub||"";d.onclick=function(){Q=null;play(id,t)};
+[].concat(x||[]).forEach(function(y){var b=document.createElement("button");b.className="x";b.textContent=y.l;b.onclick=function(e){e.stopPropagation();y.f()};d.appendChild(b)});return d}
+function cats(){var o=[];S.favs.forEach(function(f){if(f.c&&o.indexOf(f.c)<0)o.push(f.c)});return o}
+function sheet(cb,atual){var sel=atual||"",b=$("shl");
+function chip(n,v){var e=document.createElement("span");e.className="ch"+(sel==v?" on":"");e.textContent=n;e.onclick=function(){sel=v;$("shn").value="";draw()};return e}
+function draw(){b.innerHTML="";b.appendChild(chip("Sem playlist",""));cats().forEach(function(c){b.appendChild(chip(c,c))})}
+draw();$("shn").value="";$("sh").style.display="flex";
+$("shk").onclick=function(){var n=$("shn").value.trim()||sel;$("sh").style.display="none";cb(n)};
+$("sh").onclick=function(e){if(e.target==this)this.style.display="none"}}
+function favs(){var b=$("fl");b.innerHTML="";var bar=document.createElement("div");
+[["Todos",""]].concat(cats().map(function(c){return[c,c]})).forEach(function(p){var e=document.createElement("span");e.className="ch"+(fc==p[1]?" on":"");e.textContent=p[0];e.onclick=function(){fc=p[1];favs()};bar.appendChild(e)});b.appendChild(bar);
+var l=S.favs.filter(function(f){return !fc||f.c==fc});
+if(!l.length){var m=document.createElement("div");m.className="empty";m.textContent="Nada por aqui ainda. Toque na ☆ de um resultado ou em Favoritar no player.";b.appendChild(m);return}
+l.forEach(function(f,i){var d=item(f.id,f.t,f.c||"",[{l:"☰",f:function(){fav(f.id,f.t)}},{l:"✕",f:function(){S.favs.splice(S.favs.indexOf(f),1);save();favs()}}]);
+d.onclick=function(){Q={l:l,i:i};play(f.id,f.t)};b.appendChild(d)})}
+function fav(id,t){if(!id)return;var ex=S.favs.filter(function(f){return f.id==id})[0];
+sheet(function(c){if(ex)ex.c=c;else S.favs.push({id:id,t:t||id,c:c});save();msg("Salvo"+(c?" em "+c:"")+".");if($("tf").classList.contains("on"))favs()},ex&&ex.c)}
 async function go(){var q=$("q").value.trim();if(!q)return;var id=pid(q);if(id){play(id);return}
 if(!S.keys.length){tab("a");return msg("Cole sua chave da API em Ajustes para pesquisar.")}
 $("res").innerHTML='<div class="empty">Pesquisando…</div>';var err="";
@@ -105,9 +124,9 @@ function play(id,t){cur={id:id,t:t||id};$("pt").textContent=cur.t;full();want=tr
 if(!(window.YT&&YT.Player)){pend={id:id,t:t};return}pend=null;
 kill();{P=new YT.Player("yt",{videoId:id,host:S.chr?"https://www.yout"+S.chr+"ube.com":undefined,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:function(e){e.target.getIframe().allow="autoplay; encrypted-media; picture-in-picture; fullscreen"},onStateChange:st}})}
 setMeta();if(!t)fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)).then(function(r){return r.json()}).then(function(j){if(cur&&cur.id==id)setT(j.title)}).catch(function(){})}
-function st(e){if(window.Android)try{if(e.data==1)Android.setPlaying(true)}catch(x){}if(e.data==1){want=true;a.play().catch(function(){})}
+function st(e){if(window.Android)try{if(e.data==1)Android.setPlaying(true)}catch(x){}prog(e.data==1||e.data==3);if(e.data==1){want=true;a.play().catch(function(){})}
 else if(e.data==2&&document.hidden&&want)setTimeout(function(){P.playVideo()},250);
-else if(e.data==2||e.data==0){want=false;a.pause()}}
+else if(e.data==2||e.data==0){want=false;a.pause();if(e.data==0&&Q&&Q.i+1<Q.l.length){Q.i++;var nx=Q.l[Q.i];setTimeout(function(){play(nx.id,nx.t)},300)}}}
 document.addEventListener("visibilitychange",function(){if(document.hidden&&want&&P)[300,1200,3000].forEach(function(t){setTimeout(function(){if(document.hidden&&want)P.playVideo()},t)})});
 function kill(){try{if(P&&P.destroy)P.destroy()}catch(e){}P=null;$("pw").innerHTML='<div id="yt"></div>'}
 function fechar(){want=false;if(window.Android)try{Android.encerrar()}catch(x){}cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
@@ -118,7 +137,11 @@ $("mp").onclick=function(e){e.stopPropagation();if(P.getPlayerState()==1){want=f
 $("pl").onclick=function(){if($("pl").className=="mini")full()};
 $("bv").onclick=function(){fav(cur.id,cur.t)};
 $("bz").onclick=function(){var f=$("pw");(f.requestFullscreen||f.webkitRequestFullscreen||function(){}).call(f)};
-window.nativeToggle=function(){if(!P)return;try{if(P.getPlayerState()==1){want=false;P.pauseVideo()}else{want=true;a.play().catch(function(){});P.playVideo()}}catch(e){}};
+window.nativeToggle=function(f){if(!P)return;try{var pl=f===undefined?P.getPlayerState()!=1:f;if(pl){want=true;a.play().catch(function(){});P.playVideo()}else{want=false;P.pauseVideo()}}catch(e){}};
+window.nativeSeek=function(s){try{P.seekTo(s,true)}catch(e){}};
+function prog(pl){if(window.Android&&P&&cur)try{Android.setProgress(Math.floor(P.getCurrentTime()||0),Math.floor(P.getDuration()||0),pl===undefined?P.getPlayerState()==1:pl)}catch(x){}}
+setInterval(prog,3000);
+$("bp").onclick=function(){if(window.Android&&Android.miniatura)Android.miniatura();else msg("A miniatura só funciona no app instalado.")};
 window.onPip=function(b){document.body.classList.toggle("pip",b)};
 /* ---- ajustes ---- */
 $("ks").value=S.keys.join("\n");$("ch").value=S.chr;
