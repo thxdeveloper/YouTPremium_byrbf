@@ -56,7 +56,7 @@ nav button.on{color:var(--ac)}
 <main>
 <section class="tab on" id="tb"><h1>Buscar</h1>
 <input id="q" type="search" enterkeyhint="search" placeholder="Nome do vídeo ou link do YouTube">
-<button class="pri" id="go">Buscar ou reproduzir</button><div id="res"></div></section>
+<button class="pri" id="go">Buscar ou reproduzir</button><div id="cont"></div><div id="res"></div></section>
 <section class="tab" id="tf"><h1>Favoritos</h1><div id="fl"></div></section>
 <section class="tab" id="ta"><h1>Ajustes</h1>
 <div class="sub">Chaves da API do YouTube, uma por linha. Ficam só neste aparelho.</div>
@@ -74,12 +74,12 @@ nav button.on{color:var(--ac)}
 <script>
 var $=function(i){return document.getElementById(i)},S={favs:[],keys:[],chr:""},R=[],cur=null,want=false,P=null,pend=null;
 try{Object.assign(S,JSON.parse(localStorage.getItem("vm")||"{}"))}catch(e){}
-var Q=null,fc="";
+S.pos=S.pos||{};var Q=null,fc="";
 function save(){try{localStorage.setItem("vm",JSON.stringify(S))}catch(e){msg("Não foi possível salvar neste navegador.")}}
 function msg(t){var e=$("msg");e.textContent=t;e.style.opacity=1;clearTimeout(msg.t);msg.t=setTimeout(function(){e.style.opacity=0},3800)}
 function dec(s){var t=document.createElement("textarea");t.innerHTML=s;return t.value}
 function pid(t){t=(t||"").trim();var m=t.match(/[?&]v=([\w-]{11})/)||t.match(/youtu\.be\/([\w-]{11})/)||t.match(/\/(?:embed|shorts|live)\/([\w-]{11})/)||t.match(/^([\w-]{11})$/);return m&&m[1]}
-function tab(n){document.querySelectorAll(".tab").forEach(function(e){e.classList.toggle("on",e.id=="t"+n)});document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t==n)});if(n=="f")favs();if(cur&&$("pl").className=="full")mini()}
+function tab(n){document.querySelectorAll(".tab").forEach(function(e){e.classList.toggle("on",e.id=="t"+n)});document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t==n)});if(n=="f")favs();if(n=="b")cont();if(cur&&$("pl").className=="full")mini()}
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){tab(b.dataset.t)}});
 function item(id,t,sub,x){var d=document.createElement("div");d.className="item";d.innerHTML='<img loading="lazy" alt=""><div class="i"><b></b><small></small></div>';
 d.querySelector("img").src="https://i.ytimg.com/vi/"+id+"/mqdefault.jpg";d.querySelector("b").textContent=t;d.querySelector("small").textContent=sub||"";d.onclick=function(){Q=null;play(id,t)};
@@ -113,7 +113,7 @@ var a=document.createElement("audio");a.loop=true;a.volume=.01;
 s(0,"RIFF");v.setUint32(4,36+n,true);s(8,"WAVEfmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,8000,true);v.setUint16(32,1,true);v.setUint16(34,8,true);s(36,"data");v.setUint32(40,n,true);b.fill(128,44);a.src=URL.createObjectURL(new Blob([b],{type:"audio/wav"}))})();
 var tg=document.createElement("script");tg.src="https://www.youtube.com/iframe_api";document.head.appendChild(tg);
 window.onYouTubeIframeAPIReady=function(){if(pend)play(pend.id,pend.t)};
-function setMeta(){if(window.Android&&cur)try{Android.setInfo(cur.t)}catch(x){}if(!("mediaSession" in navigator)||!cur)return;navigator.mediaSession.metadata=new MediaMetadata({title:cur.t,artist:"Vídeos",artwork:[{src:"https://i.ytimg.com/vi/"+cur.id+"/mqdefault.jpg",sizes:"320x180",type:"image/jpeg"}]});
+function setMeta(){if(window.Android&&cur)try{Android.setInfo(cur.t,cur.id)}catch(x){}if(!("mediaSession" in navigator)||!cur)return;navigator.mediaSession.metadata=new MediaMetadata({title:cur.t,artist:"Vídeos",artwork:[{src:"https://i.ytimg.com/vi/"+cur.id+"/mqdefault.jpg",sizes:"320x180",type:"image/jpeg"}]});
 navigator.mediaSession.setActionHandler("play",function(){want=true;P.playVideo()});navigator.mediaSession.setActionHandler("pause",function(){want=false;P.pauseVideo()})}
 function full(){$("pl").className="full";if(!full.h){try{history.pushState({p:1},"");full.h=1}catch(e){}}}
 function mini(){$("pl").className="mini";if(full.h){full.h=0;try{history.back()}catch(e){}}}
@@ -122,14 +122,14 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden&&wan
 function setT(t){cur.t=t;$("pt").textContent=t;setMeta()}
 function play(id,t){cur={id:id,t:t||id};$("pt").textContent=cur.t;full();want=true;a.play().catch(function(){});
 if(!(window.YT&&YT.Player)){pend={id:id,t:t};return}pend=null;
-kill();{P=new YT.Player("yt",{videoId:id,host:S.chr?"https://www.yout"+S.chr+"ube.com":undefined,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:function(e){e.target.getIframe().allow="autoplay; encrypted-media; picture-in-picture; fullscreen"},onStateChange:st}})}
+kill();{P=new YT.Player("yt",{videoId:id,host:S.chr?"https://www.yout"+S.chr+"ube.com":undefined,playerVars:{start:st0(id),autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:function(e){e.target.getIframe().allow="autoplay; encrypted-media; picture-in-picture; fullscreen"},onStateChange:st}})}
 setMeta();if(!t)fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)).then(function(r){return r.json()}).then(function(j){if(cur&&cur.id==id)setT(j.title)}).catch(function(){})}
 function st(e){if(window.Android)try{if(e.data==1)Android.setPlaying(true)}catch(x){}prog(e.data==1||e.data==3);if(e.data==1){want=true;a.play().catch(function(){})}
 else if(e.data==2&&document.hidden&&want)setTimeout(function(){P.playVideo()},250);
-else if(e.data==2||e.data==0){want=false;a.pause();if(e.data==0&&Q&&Q.i+1<Q.l.length){Q.i++;var nx=Q.l[Q.i];setTimeout(function(){play(nx.id,nx.t)},300)}}}
+else if(e.data==2||e.data==0){salvarPos(e.data==0);want=false;a.pause();if(e.data==0&&Q&&Q.i+1<Q.l.length){Q.i++;var nx=Q.l[Q.i];setTimeout(function(){play(nx.id,nx.t)},300)}}}
 document.addEventListener("visibilitychange",function(){if(document.hidden&&want&&P)[300,1200,3000].forEach(function(t){setTimeout(function(){if(document.hidden&&want)P.playVideo()},t)})});
 function kill(){try{if(P&&P.destroy)P.destroy()}catch(e){}P=null;$("pw").innerHTML='<div id="yt"></div>'}
-function fechar(){want=false;if(window.Android)try{Android.encerrar()}catch(x){}cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
+function fechar(){salvarPos();cont();want=false;if(window.Android)try{Android.encerrar()}catch(x){}cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
 try{a.pause()}catch(e){}kill();
 try{navigator.mediaSession.metadata=null}catch(e){}}
 $("bb").onclick=function(e){e.stopPropagation();mini()};$("bm").onclick=function(e){e.stopPropagation();fechar()};$("mx").onclick=function(e){e.stopPropagation();fechar()};
@@ -138,6 +138,16 @@ $("pl").onclick=function(){if($("pl").className=="mini")full()};
 $("bv").onclick=function(){fav(cur.id,cur.t)};
 $("bz").onclick=function(){var f=$("pw");(f.requestFullscreen||f.webkitRequestFullscreen||function(){}).call(f)};
 window.nativeToggle=function(f){if(!P)return;try{var pl=f===undefined?P.getPlayerState()!=1:f;if(pl){want=true;a.play().catch(function(){});P.playVideo()}else{want=false;P.pauseVideo()}}catch(e){}};
+window.nativeNext=function(){if(Q&&Q.i+1<Q.l.length){Q.i++;var n=Q.l[Q.i];play(n.id,n.t)}};
+window.nativePrev=function(){try{if(P.getCurrentTime()>5||!Q||Q.i<1)P.seekTo(0,true);else{Q.i--;var n=Q.l[Q.i];play(n.id,n.t)}}catch(e){}};
+window.nativeRel=function(d){try{P.seekTo(P.getCurrentTime()+d,true)}catch(e){}};
+function st0(id){var q=S.pos[id]||0;return q>5?q:0}
+function fmt(s){var m=Math.floor(s/60),h=Math.floor(m/60);s=s%60;m=m%60;return(h?h+":"+("0"+m).slice(-2):m)+":"+("0"+s).slice(-2)}
+function salvarPos(fim){if(!cur)return;try{if(fim){delete S.pos[cur.id];save();return}var c=Math.floor(P.getCurrentTime());if(c>3){S.pos[cur.id]=c;S.last={id:cur.id,t:cur.t};var k=Object.keys(S.pos);if(k.length>300)k.slice(0,100).forEach(function(x){delete S.pos[x]});save()}}catch(e){}}
+setInterval(salvarPos,5000);
+function cont(){var b=$("cont");b.innerHTML="";if(!S.last)return;var h=document.createElement("div");h.className="sub";h.textContent="Continuar de onde parou";b.appendChild(h);
+b.appendChild(item(S.last.id,S.last.t,S.pos[S.last.id]?"Parou em "+fmt(S.pos[S.last.id]):"",{l:"✕",f:function(){S.last=null;save();cont()}}))}
+cont();
 window.nativeSeek=function(s){try{P.seekTo(s,true)}catch(e){}};
 function prog(pl){if(window.Android&&P&&cur)try{Android.setProgress(Math.floor(P.getCurrentTime()||0),Math.floor(P.getDuration()||0),pl===undefined?P.getPlayerState()==1:pl)}catch(x){}}
 setInterval(prog,3000);
