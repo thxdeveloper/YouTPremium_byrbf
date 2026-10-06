@@ -94,7 +94,7 @@ var a=document.createElement("audio");a.loop=true;a.volume=.01;
 s(0,"RIFF");v.setUint32(4,36+n,true);s(8,"WAVEfmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,8000,true);v.setUint16(32,1,true);v.setUint16(34,8,true);s(36,"data");v.setUint32(40,n,true);b.fill(128,44);a.src=URL.createObjectURL(new Blob([b],{type:"audio/wav"}))})();
 var tg=document.createElement("script");tg.src="https://www.youtube.com/iframe_api";document.head.appendChild(tg);
 window.onYouTubeIframeAPIReady=function(){if(pend)play(pend.id,pend.t)};
-function setMeta(){if(!("mediaSession" in navigator)||!cur)return;navigator.mediaSession.metadata=new MediaMetadata({title:cur.t,artist:"Vídeos",artwork:[{src:"https://i.ytimg.com/vi/"+cur.id+"/mqdefault.jpg",sizes:"320x180",type:"image/jpeg"}]});
+function setMeta(){if(window.Android&&cur)try{Android.setInfo(cur.t)}catch(x){}if(!("mediaSession" in navigator)||!cur)return;navigator.mediaSession.metadata=new MediaMetadata({title:cur.t,artist:"Vídeos",artwork:[{src:"https://i.ytimg.com/vi/"+cur.id+"/mqdefault.jpg",sizes:"320x180",type:"image/jpeg"}]});
 navigator.mediaSession.setActionHandler("play",function(){want=true;P.playVideo()});navigator.mediaSession.setActionHandler("pause",function(){want=false;P.pauseVideo()})}
 function full(){$("pl").className="full";if(!full.h){try{history.pushState({p:1},"");full.h=1}catch(e){}}}
 function mini(){$("pl").className="mini";if(full.h){full.h=0;try{history.back()}catch(e){}}}
@@ -105,12 +105,12 @@ function play(id,t){cur={id:id,t:t||id};$("pt").textContent=cur.t;full();want=tr
 if(!(window.YT&&YT.Player)){pend={id:id,t:t};return}pend=null;
 kill();{P=new YT.Player("yt",{videoId:id,host:S.chr?"https://www.yout"+S.chr+"ube.com":undefined,playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:function(e){e.target.getIframe().allow="autoplay; encrypted-media; picture-in-picture; fullscreen"},onStateChange:st}})}
 setMeta();if(!t)fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)).then(function(r){return r.json()}).then(function(j){if(cur&&cur.id==id)setT(j.title)}).catch(function(){})}
-function st(e){if(window.Android)try{Android.setPlaying(e.data==1||e.data==3)}catch(x){}if(e.data==1){want=true;a.play().catch(function(){})}
+function st(e){if(window.Android)try{if(e.data==1)Android.setPlaying(true)}catch(x){}if(e.data==1){want=true;a.play().catch(function(){})}
 else if(e.data==2&&document.hidden&&want)setTimeout(function(){P.playVideo()},250);
-else if(e.data==2||e.data==0){want=false}}
+else if(e.data==2||e.data==0){want=false;a.pause()}}
 document.addEventListener("visibilitychange",function(){if(document.hidden&&want&&P)[300,1200,3000].forEach(function(t){setTimeout(function(){if(document.hidden&&want)P.playVideo()},t)})});
 function kill(){try{if(P&&P.destroy)P.destroy()}catch(e){}P=null;$("pw").innerHTML='<div id="yt"></div>'}
-function fechar(){want=false;if(window.Android)try{Android.setPlaying(false)}catch(x){}cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
+function fechar(){want=false;if(window.Android)try{Android.encerrar()}catch(x){}cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
 try{a.pause()}catch(e){}kill();
 try{navigator.mediaSession.metadata=null}catch(e){}}
 $("bb").onclick=function(e){e.stopPropagation();mini()};$("bm").onclick=function(e){e.stopPropagation();fechar()};$("mx").onclick=function(e){e.stopPropagation();fechar()};
@@ -118,6 +118,7 @@ $("mp").onclick=function(e){e.stopPropagation();if(P.getPlayerState()==1){want=f
 $("pl").onclick=function(){if($("pl").className=="mini")full()};
 $("bv").onclick=function(){fav(cur.id,cur.t)};
 $("bz").onclick=function(){var f=$("pw");(f.requestFullscreen||f.webkitRequestFullscreen||function(){}).call(f)};
+window.nativeToggle=function(){if(!P)return;try{if(P.getPlayerState()==1){want=false;P.pauseVideo()}else{want=true;a.play().catch(function(){});P.playVideo()}}catch(e){}};
 window.onPip=function(b){document.body.classList.toggle("pip",b)};
 /* ---- ajustes ---- */
 $("ks").value=S.keys.join("\n");$("ch").value=S.chr;
