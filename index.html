@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#12101c"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>Vídeos</title>
+<meta name="theme-color" content="#0a0a0c"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>YT Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{--bg:#12101c;--card:#1c1930;--line:#2c2849;--tx:#efeaf7;--mut:#9a93b5;--ac:#b8a2ff;--sb:env(safe-area-inset-bottom,0px)}
+:root{--bg:#0a0a0c;--card:#15151b;--line:#26262f;--tx:#f5f3ef;--mut:#8f8f9c;--ac:#ff3b3b;--gold:#f4c152;--sb:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:16px/1.35 "Avenir Next","Segoe UI",Roboto,sans-serif}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:16px/1.4 "Inter","Segoe UI",Roboto,sans-serif}
 main{position:absolute;inset:0;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(150px + var(--sb))}
 .tab{display:none}.tab.on{display:block}
 h1{font-size:26px;margin:4px 2px 14px;font-weight:800;letter-spacing:-.02em}
@@ -17,7 +18,7 @@ input,textarea{width:100%;background:var(--card);border:1px solid var(--line);co
 input:focus,textarea:focus{outline:2px solid var(--ac);border-color:transparent}
 button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 button:active{transform:scale(.96)}
-.pri{background:var(--ac);color:#17102e;border:0;font-weight:700;width:100%;margin:10px 0 6px}
+.pri{background:linear-gradient(135deg,#ff3b3b,#c40d1e);color:#fff;box-shadow:0 6px 18px #ff3b3b33;border:0;font-weight:700;width:100%;margin:10px 0 6px}
 .sub{color:var(--mut);font-size:14px;margin:18px 2px 8px}
 .item{display:flex;gap:12px;margin:12px 0;align-items:center}
 .item img{width:136px;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--card);flex:none}
@@ -26,13 +27,13 @@ button:active{transform:scale(.96)}
 .item small{color:var(--mut)}
 .x{flex:none;padding:8px 12px;color:var(--mut);background:none;border:0;font-size:20px}
 .empty{color:var(--mut);padding:30px 8px;text-align:center}
-nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#161327f0;backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--sb);z-index:20}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0f0f14f0;backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--sb);z-index:20}
 nav button{flex:1;border:0;background:none;border-radius:0;padding:11px 0 9px;color:var(--mut);font-size:12px}
 nav button span{display:block;font-size:21px}
 nav button.on{color:var(--ac)}
 #pl{position:fixed;z-index:30;left:0;right:0;display:none;background:var(--bg)}
 #pl.full{display:flex;flex-direction:column;top:0;bottom:0;padding-top:env(safe-area-inset-top,0px)}
-#pl.mini{display:flex;left:8px;right:8px;bottom:calc(62px + var(--sb));height:68px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#221e3bf5;box-shadow:0 8px 24px #0008}
+#pl.mini{display:flex;left:8px;right:8px;bottom:calc(62px + var(--sb));height:68px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#17171ff5;box-shadow:0 8px 24px #0008}
 #pw{background:#000;aspect-ratio:16/9;width:100%;flex:none}
 #pw iframe{width:100%;height:100%;border:0}
 .mini #pw{width:121px;height:68px;aspect-ratio:auto;pointer-events:none}
@@ -48,13 +49,17 @@ nav button.on{color:var(--ac)}
 .pip #pl.full,.pip #pl.mini{display:flex;top:0;bottom:0;left:0;right:0;height:auto;padding:0;border:0;border-radius:0}
 .pip #pw{width:100%;height:100%;aspect-ratio:auto;pointer-events:auto}
 .ch{display:inline-block;padding:8px 14px;margin:4px 6px 4px 0;border-radius:20px;border:1px solid var(--line);background:var(--card);font-size:14px}
-.ch.on{background:var(--ac);color:#17102e;border-color:var(--ac);font-weight:700}
+.ch.on{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:700}
 #sh{position:fixed;inset:0;z-index:50;background:#0009;display:none;align-items:flex-end}
 #shb{background:var(--card);width:100%;padding:18px 18px calc(18px + var(--sb));border-radius:22px 22px 0 0}
 #shb input{margin:12px 0 4px}
+.brand{display:flex;align-items:center;gap:11px;margin:2px 2px 18px}.brand img{width:42px;height:42px;border-radius:12px}
+.brand b{font-size:23px;font-weight:800;letter-spacing:-.03em}.brand span{color:var(--ac)}
+nav button svg{display:block;margin:0 auto 4px}
+.land #tp,.land #pc{display:none!important}.land #pl.full{padding:0}.land #pl.full #pw{width:100%;height:100%;aspect-ratio:auto}
 </style></head><body>
 <main>
-<section class="tab on" id="tb"><h1>Buscar</h1>
+<section class="tab on" id="tb"><div class="brand"><img src="icon-192.png" alt=""><b>YT <span>Premium</span></b></div>
 <input id="q" type="search" enterkeyhint="search" placeholder="Nome do vídeo ou link do YouTube">
 <button class="pri" id="go">Buscar ou reproduzir</button><div id="cont"></div><div id="res"></div></section>
 <section class="tab" id="tf"><h1>Favoritos</h1><div id="fl"></div></section>
@@ -70,7 +75,7 @@ nav button.on{color:var(--ac)}
 <button class="mo x" id="mp">⏯</button><button class="mo x" id="mx">✕</button></div></div>
 <div id="sh"><div id="shb"><b>Salvar em qual playlist?</b><div id="shl" style="margin-top:8px"></div><input id="shn" placeholder="Ou crie uma nova playlist"><button class="pri" id="shk">Salvar</button></div></div>
 <div id="msg"></div>
-<nav><button data-t="b" class="on"><span>⌕</span>Buscar</button><button data-t="f"><span>★</span>Favoritos</button><button data-t="a"><span>⚙</span>Ajustes</button></nav>
+<nav><button data-t="b" class="on"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Buscar</button><button data-t="f"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Favoritos</button><button data-t="a"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Ajustes</button></nav>
 <script>
 var $=function(i){return document.getElementById(i)},S={favs:[],keys:[],chr:""},R=[],cur=null,want=false,P=null,pend=null;
 try{Object.assign(S,JSON.parse(localStorage.getItem("vm")||"{}"))}catch(e){}
@@ -115,8 +120,10 @@ var tg=document.createElement("script");tg.src="https://www.youtube.com/iframe_a
 window.onYouTubeIframeAPIReady=function(){if(pend)play(pend.id,pend.t)};
 function setMeta(){if(window.Android&&cur)try{Android.setInfo(cur.t,cur.id)}catch(x){}if(!("mediaSession" in navigator)||!cur)return;navigator.mediaSession.metadata=new MediaMetadata({title:cur.t,artist:"Vídeos",artwork:[{src:"https://i.ytimg.com/vi/"+cur.id+"/mqdefault.jpg",sizes:"320x180",type:"image/jpeg"}]});
 navigator.mediaSession.setActionHandler("play",function(){want=true;P.playVideo()});navigator.mediaSession.setActionHandler("pause",function(){want=false;P.pauseVideo()})}
-function full(){$("pl").className="full";if(!full.h){try{history.pushState({p:1},"");full.h=1}catch(e){}}}
-function mini(){$("pl").className="mini";if(full.h){full.h=0;try{history.back()}catch(e){}}}
+function ajusta(){var l=$("pl").className=="full"&&innerWidth>innerHeight;document.body.classList.toggle("land",l);try{if(window.Android){Android.imersivo(l);if($("pl").className!="full")Android.girar(false)}}catch(x){}}
+addEventListener("resize",ajusta);
+function full(){$("pl").className="full";ajusta();if(!full.h){try{history.pushState({p:1},"");full.h=1}catch(e){}}}
+function mini(){$("pl").className="mini";ajusta();if(full.h){full.h=0;try{history.back()}catch(e){}}}
 window.addEventListener("popstate",function(){if(full.h){full.h=0;if($("pl").className=="full")mini()}});
 document.addEventListener("visibilitychange",function(){if(!document.hidden&&want&&P&&P.playVideo)P.playVideo()});
 function setT(t){cur.t=t;$("pt").textContent=t;setMeta()}
@@ -129,14 +136,14 @@ else if(e.data==2&&document.hidden&&want)setTimeout(function(){P.playVideo()},25
 else if(e.data==2||e.data==0){salvarPos(e.data==0);want=false;a.pause();if(e.data==0&&Q&&Q.i+1<Q.l.length){Q.i++;var nx=Q.l[Q.i];setTimeout(function(){play(nx.id,nx.t)},300)}}}
 document.addEventListener("visibilitychange",function(){if(document.hidden&&want&&P)[300,1200,3000].forEach(function(t){setTimeout(function(){if(document.hidden&&want)P.playVideo()},t)})});
 function kill(){M.ct=0;M.du=0;M.ps=-1;try{if(P&&P.destroy)P.destroy()}catch(e){}P=null;$("pw").innerHTML='<div id="yt"></div>'}
-function fechar(){salvarPos();cont();want=false;if(window.Android)try{Android.encerrar()}catch(x){}cur=null;$("pl").className="";if(full.h){full.h=0;try{history.back()}catch(e){}}
+function fechar(){salvarPos();cont();want=false;if(window.Android)try{Android.encerrar()}catch(x){}cur=null;$("pl").className="";ajusta();if(full.h){full.h=0;try{history.back()}catch(e){}}
 try{a.pause()}catch(e){}kill();
 try{navigator.mediaSession.metadata=null}catch(e){}}
 $("bb").onclick=function(e){e.stopPropagation();mini()};$("bm").onclick=function(e){e.stopPropagation();fechar()};$("mx").onclick=function(e){e.stopPropagation();fechar()};
 $("mp").onclick=function(e){e.stopPropagation();nativeToggle()};
 $("pl").onclick=function(){if($("pl").className=="mini")full()};
 $("bv").onclick=function(){fav(cur.id,cur.t)};
-$("bz").onclick=function(){var f=$("pw");(f.requestFullscreen||f.webkitRequestFullscreen||function(){}).call(f)};
+$("bz").onclick=function(){if(window.Android&&Android.girar)Android.girar(true);else{var f=$("pw");(f.requestFullscreen||f.webkitRequestFullscreen||function(){}).call(f)}};
 var M={ct:0,du:0,ps:-1},MC=0,AC=0,LC="-";
 function fr(){return $("pw").querySelector("iframe")}
 function cmd(f,a){var r=fr();if(!r)return;r.contentWindow.postMessage(JSON.stringify({event:"command",func:f,args:a||[]}),"*");var c={playVideo:"play",pauseVideo:"pause",seekTo:"seek"}[f];if(c)r.contentWindow.postMessage({vm:1,c:c,s:a&&a[0]},"*")}
