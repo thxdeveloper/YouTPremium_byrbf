@@ -86,7 +86,10 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 <div class="sub">Chaves da API do YouTube, uma por linha. Ficam só neste aparelho.</div>
 <textarea id="ks" rows="4"></textarea>
 <button class="pri" id="tk">Testar chaves</button><div id="ko" class="sub"></div>
-<div class="sub">Caractere do endereço (opcional)</div><input id="ch" maxlength="5"><div class="sub" id="dg"></div></section>
+<div class="sub">Caractere do endereço (opcional)</div><input id="ch" maxlength="5">
+<div class="sub">Backup dos seus dados (playlists, posições e chaves)</div><div class="row2"><button class="pri" id="bk">Copiar backup</button><button class="sec" id="rs">Restaurar</button></div>
+<textarea id="bkt" rows="4" placeholder="Cole aqui o backup e toque em Restaurar" style="display:none"></textarea>
+<div class="sub" id="dg"></div></section>
 </main>
 <div id="pl"><div id="tp" class="fo"><button id="bb">‹ Voltar</button></div><div id="pw"><div id="yt"></div></div>
 <div id="pc"><div id="pt"></div>
@@ -210,6 +213,10 @@ window.nativeSeek=function(s){LC="seek "+s;cmd("seekTo",[s,true])};
 function prog(pl){if(window.Android&&cur)try{Android.setProgress(Math.floor(M.ct||0),Math.floor(M.du||0),pl===undefined?M.ps==1:pl)}catch(x){}}
 setInterval(prog,3000);
 $("bp").onclick=function(){if(window.Android&&Android.miniatura)Android.miniatura();else msg("A miniatura só funciona no app instalado.")};
+function mostraBk(t){var a=$("bkt");a.style.display="block";a.value=t;a.select();msg("Copie o texto da caixa e guarde em lugar seguro.")}
+$("bk").onclick=function(){var t=JSON.stringify(S);if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){msg("Backup copiado. Cole em um lugar seguro, como Notas ou Telegram.")},function(){mostraBk(t)});else mostraBk(t)};
+$("rs").onclick=function(){var a=$("bkt");if(a.style.display!="block"||!a.value.trim()){a.style.display="block";a.value="";a.focus();msg("Cole o backup na caixa e toque em Restaurar de novo.");return}
+try{var d=JSON.parse(a.value);if(!d||typeof d!="object"||!Array.isArray(d.favs))throw 0;Object.assign(S,d);S.pos=S.pos||{};if(!Array.isArray(S.keys))S.keys=[];save();a.style.display="none";a.value="";$("ks").value=S.keys.join("\n");$("ch").value=S.chr||"";cont();favs();msg("Backup restaurado.")}catch(e){msg("Backup inválido. Confira se colou o texto inteiro.")}};
 window.onPip=function(b){document.body.classList.toggle("pip",b)};
 /* ---- ajustes ---- */
 $("ks").value=S.keys.join("\n");$("ch").value=S.chr;
