@@ -57,9 +57,10 @@ nav button.on{color:var(--ac)}
 .brand b{font-size:23px;font-weight:800;letter-spacing:-.03em}.brand span{color:var(--ac)}
 nav button svg{display:block;margin:0 auto 4px}
 .land #tp,.land #pc{display:none!important}.land #pl.full{padding:0}.land #pl.full #pw{width:100%;height:100%;aspect-ratio:auto}
-#fb{display:none;position:fixed;z-index:35;left:calc(10px + env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;padding:0;background:#000b;border:1px solid #fff4;color:#fff;opacity:0;pointer-events:none;transition:opacity .4s}
-#fb.v{opacity:.4;pointer-events:auto}
-.land #fb{display:block}.pip #fb{display:none!important}
+#fbs{display:none;position:fixed;z-index:35;left:calc(10px + env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);flex-direction:column;gap:16px;opacity:0;pointer-events:none;transition:opacity .4s}
+#fbs.v{opacity:.45;pointer-events:auto}
+#fbs button{width:42px;height:42px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;background:#000b;border:1px solid #fff4;color:#fff}
+.land #fbs{display:flex}.pip #fbs{display:none!important}
 input[type=search]::-webkit-search-cancel-button{display:none}
 .sb{position:relative}.sb input{padding-right:48px}
 #qx{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:none;background:none;border:0;color:var(--mut);font-size:18px;padding:10px 12px}
@@ -70,6 +71,11 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 #pt{font-size:17px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mini #pt{display:block}
 .row2{display:flex;gap:10px;margin:4px 0 12px}.row2 .pri{margin:0;flex:1}.row2 .sec{flex:none;padding:12px 16px;font-weight:600}
+.tr{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:30px}
+.tr button{width:58px;height:58px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);color:var(--tx)}
+.tr .big{width:72px;height:72px;background:linear-gradient(135deg,#ff3b3b,#c40d1e);border:0;color:#fff;box-shadow:0 8px 22px #ff3b3b40}
+.mini .x{padding:8px 9px}.mini .x svg{display:block}
+.mini #pt.sc{text-overflow:clip}
 </style></head><body>
 <main>
 <section class="tab on" id="tb"><div class="brand"><img src="icon-192.png" alt=""><b>YT <span>Premium</span></b></div>
@@ -85,9 +91,10 @@ input[type=search]::-webkit-search-cancel-button{display:none}
 <div id="pl"><div id="tp" class="fo"><button id="bb">‹ Voltar</button></div><div id="pw"><div id="yt"></div></div>
 <div id="pc"><div id="pt"></div>
 <div class="fo bt"><button id="bv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>Salvar</button><button id="bp"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor"/></svg>Miniatura</button><button id="bz"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Tela cheia</button><button id="bm"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Fechar</button></div>
-<button class="mo x" id="mp">⏯</button><button class="mo x" id="mx">✕</button></div></div>
+<div class="fo tr"><button id="tv" aria-label="Anterior"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button id="tp2" class="big" aria-label="Tocar ou pausar"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><button id="tn" aria-label="Próximo"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button></div>
+<button class="mo x" id="mv" aria-label="Anterior"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button class="mo x" id="mp">⏯</button><button class="mo x" id="mn" aria-label="Próximo"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button><button class="mo x" id="mx">✕</button></div></div>
 <div id="sh"><div id="shb"><b>Salvar em qual playlist?</b><div id="shl" style="margin-top:8px"></div><input id="shn" placeholder="Ou crie uma nova playlist"><button class="pri" id="shk">Salvar</button></div></div>
-<button id="fb" aria-label="Preencher tela"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+<div id="fbs"><button id="fp" aria-label="Anterior"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button id="fb" aria-label="Preencher tela"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button id="fn" aria-label="Próximo"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button></div>
 <div id="msg"></div>
 <nav><button data-t="b" class="on"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Buscar</button><button data-t="f"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg>Reproduzir</button><button data-t="a"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Ajustes</button></nav>
 <script>
@@ -173,14 +180,20 @@ if(typeof e.data!="string")return;
 try{var d=JSON.parse(e.data);MC++;var i=d.info;if(!i)return;
 if(d.event=="onStateChange"&&typeof i=="number")M.ps=i;
 if(typeof i=="object"){if(i.currentTime!=null)M.ct=i.currentTime;if(i.duration)M.du=i.duration;if(i.playerState!=null)M.ps=i.playerState}}catch(x){}});
-setInterval(function(){$("dg").textContent="Diagnóstico: estado "+M.ps+" · "+fmt(Math.floor(M.ct||0))+" / "+fmt(Math.floor(M.du||0))+" · mensagens "+MC+" · agente "+AC+" · último comando: "+LC},1000);
+setInterval(function(){playIco();$("dg").textContent="Diagnóstico: estado "+M.ps+" · "+fmt(Math.floor(M.ct||0))+" / "+fmt(Math.floor(M.du||0))+" · mensagens "+MC+" · agente "+AC+" · último comando: "+LC},1000);
 window.nativeToggle=function(f){LC="toggle "+f;if(!cur)return;var pl=f===undefined?M.ps!=1:f;if(pl){want=true;a.play().catch(function(){});cmd("playVideo")}else{want=false;cmd("pauseVideo")}};
-function showFb(){var b=$("fb");b.classList.add("v");clearTimeout(showFb.t);if(TAPCAP)showFb.t=setTimeout(function(){b.classList.remove("v")},3000)}
+function showFb(){var b=$("fbs");b.classList.add("v");clearTimeout(showFb.t);if(TAPCAP)showFb.t=setTimeout(function(){b.classList.remove("v")},3000)}
 function sendFill(){var r=fr();if(r)r.contentWindow.postMessage({vm:1,c:"fill",s:(S.fill&&document.body.classList.contains("land"))?1:0},"*")}
 function togFill(){S.fill=!S.fill;save();sendFill();msg("Preencher tela: "+(S.fill?"sim":"não"))}
 $("fb").onclick=togFill;
-window.nativeNext=function(){LC="próximo";if(Q&&Q.i+1<Q.l.length){Q.i++;var n=Q.l[Q.i];play(n.id,n.t)}};
-window.nativePrev=function(){LC="anterior";if(M.ct>5||!Q||Q.i<1)cmd("seekTo",[0,true]);else{Q.i--;var n=Q.l[Q.i];play(n.id,n.t)}};
+function fila(){if(Q)return Q;if(!cur)return null;var i=S.favs.findIndex(function(f){return f.id==cur.id});if(i<0)return null;Q={l:S.favs,i:i};return Q}
+window.nativeNext=function(){LC="próximo";var q=fila();if(q&&q.i+1<q.l.length){q.i++;var n=q.l[q.i];play(n.id,n.t)}else msg("Não há próximo vídeo na lista.")};
+window.nativePrev=function(){LC="anterior";var q=fila();if(M.ct>5||!q||q.i<1)cmd("seekTo",[0,true]);else{q.i--;var n=q.l[q.i];play(n.id,n.t)}};
+var pi0=-1;
+function playIco(){var t=M.ps==1?1:0;if(t==pi0)return;pi0=t;$("tp2").innerHTML=t?'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>':'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';$("mp").innerHTML=t?'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>':'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'}
+$("tv").onclick=function(){nativePrev()};$("tn").onclick=function(){nativeNext()};$("tp2").onclick=function(){nativeToggle()};
+$("mv").onclick=function(e){e.stopPropagation();nativePrev()};$("mn").onclick=function(e){e.stopPropagation();nativeNext()};
+$("fp").onclick=function(){showFb();nativePrev()};$("fn").onclick=function(){showFb();nativeNext()};
 window.nativeRel=function(d){LC="pular "+d;cmd("seekTo",[Math.max(0,M.ct+d),true])};
 function st0(id){var q=S.pos[id]||0;return q>5?q:0}
 function fmt(s){var m=Math.floor(s/60),h=Math.floor(m/60);s=s%60;m=m%60;return(h?h+":"+("0"+m).slice(-2):m)+":"+("0"+s).slice(-2)}
@@ -189,6 +202,10 @@ setInterval(salvarPos,5000);
 function cont(){var b=$("cont");b.innerHTML="";if(!S.last)return;var h=document.createElement("div");h.className="sub";h.textContent="Continuar de onde parou";b.appendChild(h);
 b.appendChild(item(S.last.id,S.last.t,S.pos[S.last.id]?"Parou em "+fmt(S.pos[S.last.id]):"",{l:"✕",f:function(){S.last=null;save();cont()}}))}
 cont();
+setInterval(function(){var e=$("pt");if($("pl").className!="mini"||e.dataset.r||e.scrollWidth<=e.clientWidth)return;
+var m=e.scrollWidth-e.clientWidth,t0=null;e.dataset.r=1;e.classList.add("sc");
+function f(t){if(t0===null)t0=t;var k=Math.min(1,(t-t0)/(m*25));e.scrollLeft=m*k;if(k<1)requestAnimationFrame(f);else setTimeout(function(){e.scrollLeft=0;e.classList.remove("sc");delete e.dataset.r},1200)}
+requestAnimationFrame(f)},5000);
 window.nativeSeek=function(s){LC="seek "+s;cmd("seekTo",[s,true])};
 function prog(pl){if(window.Android&&cur)try{Android.setProgress(Math.floor(M.ct||0),Math.floor(M.du||0),pl===undefined?M.ps==1:pl)}catch(x){}}
 setInterval(prog,3000);
