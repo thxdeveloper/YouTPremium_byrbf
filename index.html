@@ -149,8 +149,8 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 <div class="sub">Backup dos seus dados (playlists, posições e chaves)</div><div class="row2"><button class="pri" id="bk">Copiar backup</button><button class="sec" id="rs">Restaurar</button></div>
 <textarea id="bkt" rows="4" placeholder="Cole aqui o backup e toque em Restaurar" style="display:none"></textarea>
 <div class="gh">Sobre</div>
-<div class="ab"><div class="ah"><img src="icon-192.png" alt=""><div><b>YT Premium</b><span>Beta fechado</span></div></div>
-<dl><div class="ar"><dt>Versão</dt><dd>Beta fechado</dd></div><div class="ar"><dt>Desenvolvido por</dt><dd>RBF R3</dd></div><div class="ar"><dt>Licença</dt><dd>Todos os direitos reservados</dd></div></dl>
+<div class="ab"><div class="ah"><img src="icon-192.png" alt=""><div><b>YT Premium</b><span>Beta Fechado</span></div></div>
+<dl><div class="ar"><dt>Versão</dt><dd id="ver"></dd></div><div class="ar"><dt>Desenvolvido por</dt><dd>RBF R3</dd></div></dl>
 <div class="af">Copyright © RBF R3. Todos os direitos reservados.</div></div>
 <div class="sub" id="dg"></div></section>
 </main>
@@ -375,6 +375,16 @@ $("qx").onclick=function(){var q=$("q");q.value="";q.parentNode.classList.remove
 chips();
 
 /* ===== v3.1: tema, perfil e saudação ===== */
+/* >>> VERSÃO DO APP: troque aqui a cada atualização (1.0, 1.1, 2.0...) <<< */
+var VERSAO="1.0";
+$("ver").textContent=VERSAO;
+var FEM=" beatriz raquel rachel isabel ester esther ingrid carmen ruth liz iris miriam mirian karen sarah sara elizabeth jennifer jaqueline jacqueline nicole alice aline michele michelle simone denise rose rosane rosana suzane luciane cristiane viviane adriane daniele danielle gisele giselle priscila priscilla joice joyce janaina maite maitê raissa rayssa thais thaís lais laís rute noemi naomi eliane eloise heloise heloísa heloisa lorraine yasmin ysabel isis ísis agnes inês ines tais lilian lillian lidiane cleide neide eunice berenice solange irene marlene arlete odete celeste ";
+var MASC=" luca lucca joshua noa ilia elias jonas tomas lucas matias mathias nikita saulo josue josué jose josé ";
+function norm(x){return x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function fem(nome){var p=norm(nome.trim()).split(/\s+/)[0].replace(/[^a-z]/g,"");if(!p)return false;
+var q=" "+p+" ";if(MASC.indexOf(q)>=0)return false;if(FEM.indexOf(q)>=0)return true;
+return/a$/.test(p)||/(iane|ilde|elle|ette)$/.test(p)}
+function bv(n){return fem(n)?"Bem-vinda, ":"Bem-vindo, "}
 var ICP='<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.8-3.6 3.9-5.6 7.5-5.6s6.7 2 7.5 5.6"/></svg>';
 try{var of0=JSON.parse(localStorage.getItem("vf")||"{}");if(of0.foto)S.foto=of0.foto}catch(e){}
 function saveF(){wr("vf",{foto:S.foto||""})}
@@ -382,7 +392,7 @@ function tema(t,sv){S.theme=t=="light"?"light":"dark";document.documentElement.s
 var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",S.theme=="light"?"#edeff2":"#0a0a0c");
 document.querySelectorAll(".tm").forEach(function(b){b.classList.toggle("on",b.dataset.th==S.theme)});try{if(window.Android&&Android.temaClaro)Android.temaClaro(S.theme=="light")}catch(e){}if(sv)save()}
 function cab(){var n=(S.nome||"").trim(),t=$("tgl");t.innerHTML="";
-if(n){t.appendChild(document.createTextNode("Bem-vindo, "));var b=document.createElement("b");b.textContent=n;t.appendChild(b);t.appendChild(document.createTextNode("! Seu conteúdo favorito, sem limites."))}
+if(n){t.appendChild(document.createTextNode(bv(n)));var b=document.createElement("b");b.textContent=n;t.appendChild(b);t.appendChild(document.createTextNode("! Seu conteúdo favorito, sem limites."))}
 else{t.appendChild(document.createTextNode("Seu conteúdo favorito,"));t.appendChild(document.createElement("br"));t.appendChild(document.createTextNode("sem limites."))}}
 function perfil(){var n=(S.nome||"").trim(),ini=n.charAt(0).toUpperCase(),A=$("av");A.innerHTML="";
 if(S.foto){var i=document.createElement("img");i.alt="";i.src=S.foto;A.appendChild(i)}else if(ini)A.textContent=ini;else A.innerHTML=ICP;
