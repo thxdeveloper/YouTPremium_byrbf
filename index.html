@@ -240,7 +240,7 @@ try{var r=await(await fetch("https://www.googleapis.com/youtube/v3/videos?part=i
 if("serviceWorker" in navigator&&/^http/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(function(){});
 
 /* ===== v2: armazenamento leve, playlists, importação, recentes e cache de busca ===== */
-var LIM=60;
+var LIM=15;
 function wr(k,o){try{localStorage.setItem(k,JSON.stringify(o))}catch(e){msg("Armazenamento cheio. Copie o backup em Ajustes e limpe o cache de buscas.")}}
 function save(){var o={};for(var k in S)if(["pos","last","bq"].indexOf(k)<0)o[k]=S[k];wr("vm",o)}
 function savePos(){wr("vp",{pos:S.pos,last:S.last})}
@@ -268,7 +268,7 @@ function lista(){if(fc=="@rec")return S.hist.slice();if(fc=="@top")return Object
 function itemMenu(f,l){var i=l.indexOf(f);function mv(d){var j=i+d;if(j<0||j>=l.length)return;var a=S.favs.indexOf(f),b=S.favs.indexOf(l[j]);S.favs[a]=l[j];S.favs[b]=f;save();favs()}
 menu(f.t.slice(0,60),[{l:"▲ Mover para cima",f:function(){mv(-1)}},{l:"▼ Mover para baixo",f:function(){mv(1)}},{l:"Mudar playlists",f:function(){fav(f.id,f.t)}}])}
 function favs(){var b=$("fl");b.innerHTML="";var bar=document.createElement("div");
-[["Todos",""],["Recentes","@rec"],["Mais tocadas","@top"]].concat(cats().map(function(c){return[c,c]})).forEach(function(p){var e=document.createElement("span");e.className="ch"+(fc==p[1]?" on":"");e.textContent=p[0];e.onclick=function(){fc=p[1];LIM=60;favs()};bar.appendChild(e)});b.appendChild(bar);
+[["Todos",""],["Recentes","@rec"],["Mais tocadas","@top"]].concat(cats().map(function(c){return[c,c]})).forEach(function(p){var e=document.createElement("span");e.className="ch"+(fc==p[1]?" on":"");e.textContent=p[0];e.onclick=function(){fc=p[1];LIM=15;favs()};bar.appendChild(e)});b.appendChild(bar);
 var l=lista(),virt=fc.charAt(0)=="@";
 if(fc&&!virt){var g=document.createElement("div");g.className="row2";g.innerHTML='<button class="sec" style="flex:1">Renomear</button><button class="sec" style="flex:1">Apagar playlist</button>';
 g.children[0].onclick=function(){dlg("Renomear playlist","Novo nome",fc,"Salvar",function(n){n=n.trim();if(!n||n==fc)return;var ex={};S.favs.forEach(function(f){if(f.c==n)ex[f.id]=1});S.favs=S.favs.filter(function(f){return !(f.c==fc&&ex[f.id])});S.favs.forEach(function(f){if(f.c==fc)f.c=n});save();fc=n;favs()})};
@@ -278,8 +278,8 @@ var rw=document.createElement("div");rw.className="row2";rw.innerHTML='<button c
 rw.children[0].onclick=function(){Q={l:l,i:0};play(l[0].id,l[0].t,true)};
 rw.children[1].onclick=function(){var m2=l.slice().sort(function(){return Math.random()-.5});Q={l:m2,i:0};play(m2[0].id,m2[0].t,true)};b.appendChild(rw);
 l.slice(0,LIM).forEach(function(f,i){var ex=virt?[{l:"☆",f:function(){fav(f.id,f.t)}}]:[{l:"⋯",f:function(){itemMenu(f,l)}},{l:"✕",f:function(){S.favs.splice(S.favs.indexOf(f),1);save();favs()}}];
-var d=item(f.id,f.t,virt?"":(f.c||""),ex);d.onclick=function(){Q={l:l,i:i};play(f.id,f.t)};b.appendChild(d)});
-if(l.length>LIM){var mb=document.createElement("button");mb.className="sec";mb.style.cssText="width:100%;margin:10px 0";mb.textContent="Mostrar mais ("+(l.length-LIM)+")";mb.onclick=function(){LIM+=60;favs()};b.appendChild(mb)}}
+var d=item(f.id,f.t,(virt||fc)?"":(f.c||""),ex);d.onclick=function(){Q={l:l,i:i};play(f.id,f.t)};b.appendChild(d)});
+if(l.length>LIM){var mb=document.createElement("button");mb.className="sec";mb.style.cssText="width:100%;margin:10px 0";mb.textContent="Mostrar mais 15 (restam "+(l.length-LIM)+")";mb.onclick=function(){LIM+=15;favs()};b.appendChild(mb)}}
 /* busca com cache e importação de playlist do YouTube */
 var AP="https://www.googleapis.com/youtube/v3/";
 async function api(u){var er="";for(var i=0;i<S.keys.length;i++){try{var r=await(await fetch(u+"&key="+encodeURIComponent(S.keys[i]))).json();if(r.error)throw new Error(r.error.message);return r}catch(e){er=e.message}}throw new Error(er||"Nenhuma chave cadastrada")}
@@ -303,7 +303,7 @@ var l=[],tk="";do{var r=await api(AP+"playlistItems?part=snippet&maxResults=50&p
 (r.items||[]).forEach(function(it){var sn=it.snippet;if(sn&&sn.resourceId&&sn.title!="Private video"&&sn.title!="Deleted video")l.push({id:sn.resourceId.videoId,t:dec(sn.title)})});tk=r.nextPageToken||""}while(tk&&l.length<400);
 $("res").innerHTML="";
 dlg("Importar "+l.length+" vídeos","Nome da playlist",nome,"Importar",function(n){n=n.trim()||nome;var ex={};S.favs.forEach(function(f){ex[f.id+"|"+f.c]=1});var add=0;
-l.forEach(function(v){if(!ex[v.id+"|"+n]){S.favs.push({id:v.id,t:v.t,c:n});add++}});save();$("q").value="";$("q").parentNode.classList.remove("t");msg(add+" vídeos importados em "+n+".");fc=n;LIM=60;tab("f")})}
+l.forEach(function(v){if(!ex[v.id+"|"+n]){S.favs.push({id:v.id,t:v.t,c:n});add++}});save();$("q").value="";$("q").parentNode.classList.remove("t");msg(add+" vídeos importados em "+n+".");fc=n;LIM=15;tab("f")})}
 catch(e){$("res").innerHTML='<div class="empty"></div>';$("res").firstChild.textContent="Não foi possível importar: "+e.message}}
 async function go(){var q=$("q").value.trim();if(!q)return;var m=q.match(/[?&]list=([\w-]+)/);
 if(m&&!/[?&]v=/.test(q)&&!/youtu\.be\//.test(q))return importar(m[1]);
