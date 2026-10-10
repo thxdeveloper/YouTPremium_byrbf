@@ -30,6 +30,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
 #ovb{margin-top:1vw;height:.7vw;border-radius:.4vw;background:#2a2a33;overflow:hidden}
 #ovp{height:100%;width:0;background:#ff3b3b}
 #mg{position:absolute;left:10%;right:10%;top:8%;padding:1.4vw 2vw;border-radius:1.2vw;background:#efeaf7;color:#17102e;font-size:2vw;text-align:center;display:none;pointer-events:none}
+#fsb{position:fixed;top:10px;right:10px;z-index:60;width:44px;height:44px;padding:0;border-radius:10px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.55);color:#fff;opacity:.35;cursor:pointer}
+#fsb:hover,#fsb:focus{opacity:1}
+#fso{position:fixed;left:0;top:0;right:0;bottom:0;z-index:59;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);color:#fff;font-size:3vw;text-align:center;padding:0 8%;cursor:pointer}
 #er{position:absolute;left:7%;bottom:1.2%;font-size:1vw;color:#6b6b78}
 </style>
 </head>
@@ -52,6 +55,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
 <div id="ov"><div id="ovt"></div><div id="ovr"><span id="ovs"></span><span id="ovtm"></span></div><div id="ovb"><div id="ovp"></div></div></div>
 <div id="mg"></div>
 <div id="er"></div>
+<button id="fsb" title="Tela cheia (F)" aria-label="Tela cheia"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+<div id="fso">Clique em qualquer lugar da tela para ativar a tela cheia</div>
 <script>
 (function () {
   var DB = (location.search.match(/[?&]db=([^&]+)/) || [])[1];
@@ -114,6 +119,40 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
         ' | src=' + src.slice(0, 60) + ' | origens=' + JSON.stringify(msgOrigins) + ' | eventos=' + JSON.stringify(msgTipos);
     }, 1000);
   }
+  var TV_VER = 5;
+  // ---- tela cheia (o navegador só permite entrar com um clique na página; sair é livre) ----
+  function emTela() { return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement; }
+  function telaCheia() {
+    var d = document.documentElement, r;
+    try {
+      if (emTela()) { r = (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen); if (r) r.call(document); }
+      else {
+        r = (d.requestFullscreen || d.webkitRequestFullscreen || d.mozRequestFullScreen);
+        var p = r && r.call(d);
+        if (p && p.catch) p.catch(function () {});
+      }
+    } catch (e) {}
+  }
+  var fsoT = 0;
+  function pedeTelaCheia() {
+    if (emTela()) { telaCheia(); return; }
+    telaCheia();   // alguns navegadores de TV aceitam sem clique
+    setTimeout(function () {
+      if (emTela()) return;
+      $('fso').style.display = 'flex';
+      clearTimeout(fsoT);
+      fsoT = setTimeout(function () { $('fso').style.display = 'none'; }, 10000);
+    }, 400);
+  }
+  $('fsb').onclick = function (e) { telaCheia(); };
+  $('fso').onclick = function () { $('fso').style.display = 'none'; telaCheia(); };
+  document.addEventListener('keydown', function (e) {
+    if ((e.keyCode === 70 || e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.altKey && !e.metaKey) telaCheia();
+  }, false);
+  document.addEventListener('click', function (e) {   // na tela do código, um clique já abre a tela cheia
+    var t = e.target;
+    if (!visivel && !emTela() && t !== $('nv') && t !== $('fsb') && !$('fsb').contains(t)) telaCheia();
+  }, false);
   var ORD = ['highres', 'hd2880', 'hd2160', 'hd1440', 'hd1080', 'hd720', 'large', 'medium', 'small', 'tiny'];
 
   // ---- interface ----
@@ -321,6 +360,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     else if (a === 'rel') com(function () { P.seekTo(Math.max(0, P.getCurrentTime() + (+c.s || 0)), true); });
     else if (a === 'stop') para();
     else if (a === 'q') { qSel = c.q || 'auto'; aplicaQ(); setTimeout(aplicaQ, 1500); }
+    else if (a === 'fs') pedeTelaCheia();
+    else if (a === 'hi' && c.ch !== undefined) {   // o celular acabou de conectar: já deixa o modo preparado
+      var nc = String(c.ch || 'none').slice(0, 5);
+      if (nc !== chr) { chr = nc; semHost = false; }
+      if (c.q) qSel = c.q;
+      if (c.cc !== undefined) ccOn = !!+c.cc;
+      if (c.ctl !== undefined) ctlOn = !!+c.ctl;
+    }
     else if (a === 'ctl') { ctlOn = !!+c.v; if (ctlOn) $('ov').style.opacity = 0; if (P && pronto && cur.id && ctlCriado !== ctlOn) recriaPlayer(); }
     else if (a === 'cc') { ccOn = !!+c.v; if (P && pronto && cur.id && ccCriado !== ccOn) recriaPlayer(); }
     if (a === 'seek' || a === 'rel' || a === 'play' || a === 'pause') ovMostra();
@@ -340,7 +387,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
 
   // ---- estado enviado ao celular ----
   function estado() {
-    var o = { ts: { '.sv': 'timestamp' }, v: 1, n: lastN, ps: ps, id: cur.id, t: (cur.t || '').slice(0, 150), ct: 0, du: 0, nx: proxId, er: er, q: '', ql: '', cc: ccOn ? 1 : 0, hs: semHost ? 2 : (chrAtivo !== 'none' ? 1 : 0) };
+    var o = { ts: { '.sv': 'timestamp' }, v: 1, n: lastN, ps: ps, id: cur.id, t: (cur.t || '').slice(0, 150), ct: 0, du: 0, nx: proxId, er: er, tv: TV_VER, q: '', ql: '', cc: ccOn ? 1 : 0, hs: semHost ? 2 : (chrAtivo !== 'none' ? 1 : 0) };
     if (P && pronto && cur.id) com(function () {
       o.ct = Math.floor(P.getCurrentTime() || 0);
       o.du = Math.floor(P.getDuration() || 0);
@@ -351,7 +398,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
         if (d && d.title) { cur.t = d.title; o.t = cur.t.slice(0, 150); }
       }
     });
-    if (slim) { delete o.q; delete o.ql; delete o.cc; delete o.hs; }
+    if (slim) { delete o.q; delete o.ql; delete o.cc; delete o.hs; delete o.tv; }
     return o;
   }
   var gBusy = false, gDirty = false;
