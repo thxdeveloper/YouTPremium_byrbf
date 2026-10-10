@@ -95,7 +95,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   var proxId = '', proxT = '';
   var lastN = 0, primeira = true;
   var falhas = 0, srvOk = false, ultimoCel = 0, ultimoErro = '';
-  var chr = 'none', chrAtivo = 'none', semHost = false, qSel = 'auto', ccOn = false, ccCriado = false, pausaAoPronto = false, tamAlvo = '', slim = false, hostT = 0;
+  var chr = 'none', chrAtivo = 'none', semHost = false, qSel = 'auto', ccOn = false, ccCriado = false, ctlOn = false, ctlCriado = false, pausaAoPronto = false, tamAlvo = '', slim = false, hostT = 0;
   // ---- diagnóstico: abra tv.html?dbg=1 ----
   var dbg = /[?&]dbg=1/.test(location.search), msgOrigins = {}, msgTipos = {};
   function hex(t) { var r = []; for (var i = 0; i < String(t).length; i++) r.push(String(t).charCodeAt(i).toString(16)); return r.join(' '); }
@@ -137,7 +137,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     $('ovp').style.width = du ? Math.min(100, ct / du * 100) + '%' : '0';
   }
   function ovMostra() {
-    if (!visivel) return;
+    if (!visivel || ctlOn) return;
     $('ov').style.opacity = 1;
     atualizaOv();
     clearTimeout(ovT);
@@ -244,10 +244,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     $('pw').innerHTML = '<div id="player"></div>';
     var cfg = {
       width: '100%', height: '100%', videoId: id,
-      playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, iv_load_policy: 3, cc_load_policy: ccOn ? 1 : 0, start: Math.floor(s) },
+      playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: ctlOn ? 1 : 0, disablekb: ctlOn ? 0 : 1, fs: ctlOn ? 1 : 0, modestbranding: 1, iv_load_policy: 3, cc_load_policy: ccOn ? 1 : 0, start: Math.floor(s) },
       events: { onReady: onPronto, onStateChange: onEstado, onError: onErro }
     };
-    ccCriado = ccOn;
+    ccCriado = ccOn; ctlCriado = ctlOn;
     if (ccOn) { cfg.playerVars.cc_lang_pref = 'pt'; cfg.playerVars.hl = 'pt'; }
     var h = hostDe(chrAtivo);
     if (h) cfg.host = h;
@@ -271,12 +271,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     }
     if (o.q) qSel = o.q;
     if (o.cc !== undefined && o.cc !== null) ccOn = !!+o.cc;
+    if (o.ctl !== undefined && o.ctl !== null) ctlOn = !!+o.ctl;
     cur = { id: id, t: t || '' };
     er = 0; ps = 3;
     s = Math.max(0, +s || 0);
     mostraPlayer(true);
     if (!apiOk || (P && !pronto)) { pend = { id: id, t: t, s: s, o: o }; return; }
-    if (P && (chrAtivo !== (semHost ? 'none' : chr) || ccCriado !== ccOn)) {   // o caractere mudou: recria o player
+    if (P && (chrAtivo !== (semHost ? 'none' : chr) || ccCriado !== ccOn || ctlCriado !== ctlOn)) {   // o caractere mudou: recria o player
       com(function () { P.destroy(); });
       P = null; pronto = false;
     }
@@ -312,7 +313,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   function exec(c) {
     ultimoCel = new Date().getTime();
     var a = c.a;
-    if (a === 'load') { carrega(c.id, c.t, c.s, { ch: c.ch, q: c.q, cc: c.cc }); proxId = c.ni || ''; proxT = c.nt || ''; }
+    if (a === 'load') { carrega(c.id, c.t, c.s, { ch: c.ch, q: c.q, cc: c.cc, ctl: c.ctl }); proxId = c.ni || ''; proxT = c.nt || ''; }
     else if (a === 'nxt') { proxId = c.ni || ''; proxT = c.nt || ''; }
     else if (a === 'play') com(function () { P.playVideo(); });
     else if (a === 'pause') com(function () { P.pauseVideo(); });
@@ -320,6 +321,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     else if (a === 'rel') com(function () { P.seekTo(Math.max(0, P.getCurrentTime() + (+c.s || 0)), true); });
     else if (a === 'stop') para();
     else if (a === 'q') { qSel = c.q || 'auto'; aplicaQ(); setTimeout(aplicaQ, 1500); }
+    else if (a === 'ctl') { ctlOn = !!+c.v; if (ctlOn) $('ov').style.opacity = 0; if (P && pronto && cur.id && ctlCriado !== ctlOn) recriaPlayer(); }
     else if (a === 'cc') { ccOn = !!+c.v; if (P && pronto && cur.id && ccCriado !== ccOn) recriaPlayer(); }
     if (a === 'seek' || a === 'rel' || a === 'play' || a === 'pause') ovMostra();
     atualizaStatus();
