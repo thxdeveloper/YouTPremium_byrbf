@@ -376,7 +376,7 @@ chips();
 
 /* ===== v3.1: tema, perfil e saudação ===== */
 /* >>> VERSÃO DO APP: troque aqui a cada atualização (1.0, 1.1, 2.0...) <<< */
-var VERSAO="1.0";
+var VERSAO="1.1";
 $("ver").textContent=VERSAO;
 var FEM=" beatriz raquel rachel isabel ester esther ingrid carmen ruth liz iris miriam mirian karen sarah sara elizabeth jennifer jaqueline jacqueline nicole alice aline michele michelle simone denise rose rosane rosana suzane luciane cristiane viviane adriane daniele danielle gisele giselle priscila priscilla joice joyce janaina maite maitê raissa rayssa thais thaís lais laís rute noemi naomi eliane eloise heloise heloísa heloisa lorraine yasmin ysabel isis ísis agnes inês ines tais lilian lillian lidiane cleide neide eunice berenice solange irene marlene arlete odete celeste ";
 var MASC=" luca lucca joshua noa ilia elias jonas tomas lucas matias mathias nikita saulo josue josué jose josé ";
@@ -393,8 +393,8 @@ var TEMAS=[{id:"light",n:"Claro",m:"light",v:"--bgl",c:"#edeff2"},{id:"dark",n:"
 {id:"gelo",n:"Gelo",m:"light",v:"--bg_gelo",c:"#eaeff7"},{id:"vinil",n:"Vinil",m:"dark",v:"--bg_vinil",c:"#070606"},
 {id:"pessego",n:"Pêssego",m:"light",v:"--bg_pessego",c:"#f8e8e5"},{id:"carbono",n:"Carbono",m:"dark",v:"--bg_carbono",c:"#090909"}];
 function tinfo(id){for(var k=0;k<TEMAS.length;k++)if(TEMAS[k].id==id)return TEMAS[k];return TEMAS[1]}
-(function(){var g=$("tms");TEMAS.forEach(function(t){var b=document.createElement("button");b.className="tm";b.dataset.th=t.id;
-b.innerHTML='<div class="pv" style="background-image:var('+t.v+')"></div><span>'+t.n+'</span>';b.onclick=function(){tema(t.id,true)};g.appendChild(b)})})();
+(function(){var g=$("tms");try{TEMAS.forEach(function(t){var b=document.createElement("button");b.className="tm";b.dataset.th=t.id;
+b.innerHTML='<div class="pv" style="background-image:var('+t.v+')"></div><span>'+t.n+'</span>';b.onclick=function(){tema(t.id,true)};g.appendChild(b)})}catch(e){g.style.display="block";g.textContent="Erro ao montar temas: "+(e&&e.message||e)}})();
 function tema(t,sv){var T=tinfo(t);S.theme=T.id;var r=document.documentElement;r.setAttribute("data-theme",T.m);
 r.style.setProperty("--bgi","var("+T.v+")");r.style.setProperty("--bg",T.c);
 var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",T.c);
