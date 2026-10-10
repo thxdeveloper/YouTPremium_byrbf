@@ -95,7 +95,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   var proxId = '', proxT = '';
   var lastN = 0, primeira = true;
   var falhas = 0, srvOk = false, ultimoCel = 0, ultimoErro = '';
-  var chr = 'none', chrAtivo = 'none', semHost = false, qSel = 'auto', ccOn = false, slim = false, hostT = 0;
+  var chr = 'none', chrAtivo = 'none', semHost = false, qSel = 'auto', ccOn = false, ccCriado = false, pausaAoPronto = false, tamAlvo = '', slim = false, hostT = 0;
   // ---- diagnóstico: abra tv.html?dbg=1 ----
   var dbg = /[?&]dbg=1/.test(location.search), msgOrigins = {}, msgTipos = {};
   function hex(t) { var r = []; for (var i = 0; i < String(t).length; i++) r.push(String(t).charCodeAt(i).toString(16)); return r.join(' '); }
@@ -164,7 +164,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   // ---- player do YouTube ----
   function onEstado(e) {
     ps = e.data;
-    if (ps === 1) { setTimeout(aplicaQ, 700); setTimeout(aplicaQ, 4000); setTimeout(aplicaCC, 700); setTimeout(aplicaCC, 3000); }
+    if (ps === 1 && pausaAoPronto) { pausaAoPronto = false; com(function () { P.pauseVideo(); }); }
+    if (ps === 1) { setTimeout(aplicaQ, 700); setTimeout(aplicaQ, 4000); }
     if (ps === 0) fim();
     ovMostra();
     grava();
@@ -178,7 +179,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     pronto = true;
     clearTimeout(hostT);
     if (pend) { var p = pend; pend = null; carrega(p.id, p.t, p.s, p.o); }
-    else { aplicaQ(); aplicaCC(); }
+    else aplicaQ();
   }
   // ---- qualidade e legenda ----
   function niveis() {
@@ -190,28 +191,50 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     for (var i = 0; i < ORD.length; i++) if (l.indexOf(ORD[i]) >= 0) return ORD[i];
     return '';
   }
+  // O YouTube ignora o pedido direto de qualidade nos players incorporados. Então, além do pedido,
+  // ajustamos o tamanho do player: no automático ele escolhe a resolução pelo tamanho que tem na tela.
+  var TAM = { tiny: [256, 144], small: [426, 240], medium: [640, 360], large: [854, 480], hd720: [1280, 720], hd1080: [1920, 1080], hd1440: [2560, 1440], hd2160: [3840, 2160], hd2880: [3840, 2160], highres: [3840, 2160] };
+  function aplicaTamanho(alvo) {
+    tamAlvo = alvo || '';
+    var l = $('pw').getElementsByTagName('iframe');
+    if (!l.length) return;
+    var st = l[0].style, t = TAM[tamAlvo];
+    if (!t) {
+      st.position = ''; st.left = ''; st.top = ''; st.width = ''; st.height = '';
+      st.transform = ''; st.webkitTransform = ''; st.transformOrigin = ''; st.webkitTransformOrigin = '';
+      return;
+    }
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var sc = Math.min(vw / t[0], vh / t[1]);
+    var tr = 'translate(' + ((vw - t[0] * sc) / 2) + 'px,' + ((vh - t[1] * sc) / 2) + 'px) scale(' + sc + ')';
+    st.position = 'absolute'; st.left = '0'; st.top = '0';
+    st.width = t[0] + 'px'; st.height = t[1] + 'px';
+    st.transformOrigin = '0 0'; st.webkitTransformOrigin = '0 0';
+    st.transform = tr; st.webkitTransform = tr;
+  }
+  window.addEventListener('resize', function () { aplicaTamanho(tamAlvo); }, false);
   function aplicaQ() {
     if (!P || !pronto || !cur.id) return;
     var alvo = qSel;
-    if (alvo === 'max') alvo = melhor(niveis()) || 'highres';
+    if (alvo === 'max') alvo = melhor(niveis()) || 'hd2160';
     if (alvo === 'auto') {
       com(function () { if (P.setPlaybackQualityRange) P.setPlaybackQualityRange('tiny', 'highres'); });
       com(function () { P.setPlaybackQuality('default'); });
+      aplicaTamanho('');
       return;
     }
     com(function () { P.setPlaybackQuality(alvo); });
     com(function () { if (P.setPlaybackQualityRange) P.setPlaybackQualityRange(alvo, alvo); });
+    aplicaTamanho(alvo);
   }
-  function aplicaCC() {
-    if (!P || !pronto || !cur.id) return;
-    if (ccOn) {
-      com(function () { P.loadModule('captions'); });
-      com(function () { P.loadModule('cc'); });
-    } else {
-      com(function () { P.setOption('captions', 'track', {}); });
-      com(function () { P.unloadModule('captions'); });
-      com(function () { P.unloadModule('cc'); });
-    }
+  // legenda: só se decide ao criar o player (é o único jeito que o YouTube respeita); mudar recria o player
+  function recriaPlayer() {
+    var pos = 0;
+    com(function () { pos = P.getCurrentTime() || 0; });
+    pausaAoPronto = (ps === 2);
+    com(function () { P.destroy(); });
+    P = null; pronto = false;
+    criaPlayer(cur.id, pos);
   }
   // ---- player (com o "caractere do endereço", igual ao app) ----
   function hostDe(c) { return c && c !== 'none' ? 'https://www.youtube-nocookie.com' : undefined; }   // é para onde o endereço com caractere leva
@@ -224,6 +247,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
       playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, iv_load_policy: 3, cc_load_policy: ccOn ? 1 : 0, start: Math.floor(s) },
       events: { onReady: onPronto, onStateChange: onEstado, onError: onErro }
     };
+    ccCriado = ccOn;
+    if (ccOn) { cfg.playerVars.cc_lang_pref = 'pt'; cfg.playerVars.hl = 'pt'; }
     var h = hostDe(chrAtivo);
     if (h) cfg.host = h;
     P = new YT.Player('player', cfg);
@@ -251,7 +276,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     s = Math.max(0, +s || 0);
     mostraPlayer(true);
     if (!apiOk || (P && !pronto)) { pend = { id: id, t: t, s: s, o: o }; return; }
-    if (P && chrAtivo !== (semHost ? 'none' : chr)) {   // o caractere mudou: recria o player
+    if (P && (chrAtivo !== (semHost ? 'none' : chr) || ccCriado !== ccOn)) {   // o caractere mudou: recria o player
       com(function () { P.destroy(); });
       P = null; pronto = false;
     }
@@ -295,7 +320,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     else if (a === 'rel') com(function () { P.seekTo(Math.max(0, P.getCurrentTime() + (+c.s || 0)), true); });
     else if (a === 'stop') para();
     else if (a === 'q') { qSel = c.q || 'auto'; aplicaQ(); setTimeout(aplicaQ, 1500); }
-    else if (a === 'cc') { ccOn = !!+c.v; aplicaCC(); setTimeout(aplicaCC, 1500); }
+    else if (a === 'cc') { ccOn = !!+c.v; if (P && pronto && cur.id && ccCriado !== ccOn) recriaPlayer(); }
     if (a === 'seek' || a === 'rel' || a === 'play' || a === 'pause') ovMostra();
     atualizaStatus();
     setTimeout(grava, 400);
