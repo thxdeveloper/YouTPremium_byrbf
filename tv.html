@@ -96,6 +96,24 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   var lastN = 0, primeira = true;
   var falhas = 0, srvOk = false, ultimoCel = 0, ultimoErro = '';
   var chr = 'none', chrAtivo = 'none', semHost = false, qSel = 'auto', ccOn = false, slim = false, hostT = 0;
+  // ---- diagnóstico: abra tv.html?dbg=1 ----
+  var dbg = /[?&]dbg=1/.test(location.search), msgOrigins = {}, msgTipos = {};
+  function hex(t) { var r = []; for (var i = 0; i < String(t).length; i++) r.push(String(t).charCodeAt(i).toString(16)); return r.join(' '); }
+  if (dbg) {
+    var dbgEl = document.createElement('div');
+    dbgEl.style.cssText = 'position:fixed;left:0;bottom:0;z-index:99;background:rgba(0,0,0,.85);color:#0f0;font:14px monospace;padding:6px;max-width:100%;word-break:break-all';
+    document.body.appendChild(dbgEl);
+    window.addEventListener('message', function (e) {
+      msgOrigins[e.origin] = (msgOrigins[e.origin] || 0) + 1;
+      var tp = ''; try { tp = (typeof e.data === 'string' ? JSON.parse(e.data) : e.data).event || ''; } catch (x) {}
+      if (tp) msgTipos[tp] = (msgTipos[tp] || 0) + 1;
+    });
+    setInterval(function () {
+      var f = document.querySelector('#pw iframe'), src = f ? f.src : '(sem iframe)';
+      dbgEl.textContent = 'ch(hex)=' + hex(chr) + ' | ativo(hex)=' + hex(chrAtivo) + ' | semHost=' + semHost + ' | pronto=' + pronto + ' | modo=' + (P && P.raw ? 'direto(' + P.nmsg + ' msgs)' : 'api') + ' | ps=' + ps +
+        ' | src=' + src.slice(0, 60) + ' | origens=' + JSON.stringify(msgOrigins) + ' | eventos=' + JSON.stringify(msgTipos);
+    }, 1000);
+  }
   var ORD = ['highres', 'hd2880', 'hd2160', 'hd1440', 'hd1080', 'hd720', 'large', 'medium', 'small', 'tiny'];
 
   // ---- interface ----
@@ -195,6 +213,92 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
       com(function () { P.unloadModule('cc'); });
     }
   }
+  // ---- comunicação direta com o player (usada com o "caractere do endereço") ----
+  // A API oficial confere o endereço do player e fica muda com o caractere. Aqui falamos
+  // direto com o player, pelas mensagens internas dele (o mesmo protocolo da API).
+  var rawAtual = null, rawSeq = 0;
+  function RawPlayer(cfg) {
+    var self = this;
+    self.raw = true; self.nmsg = 0;
+    self.wid = ++rawSeq; self.ev = cfg.events || {};
+    self.info = {}; self.ready = false; self.got = false; self.st = -2;
+    var pv = cfg.playerVars || {};
+    var q = 'enablejsapi=1&widgetid=' + self.wid + '&origin=' + encodeURIComponent(location.protocol + '//' + location.host) + '&html5=1';
+    for (var k in pv) if (pv.hasOwnProperty(k)) q += '&' + k + '=' + encodeURIComponent(pv[k]);
+    var f = document.createElement('iframe');
+    f.setAttribute('allow', 'autoplay; encrypted-media');
+    f.setAttribute('allowfullscreen', '');
+    f.src = cfg.host + '/embed/' + cfg.videoId + '?' + q;
+    self.f = f;
+    f.onload = function () { self.ola(); };
+    document.getElementById(cfg.el).appendChild(f);
+    self.t = setInterval(function () { if (!self.got) self.ola(); }, 400);
+    self.h = function (e) { self.recebe(e); };
+    window.addEventListener('message', self.h, false);
+    rawAtual = self;
+  }
+  RawPlayer.prototype.envia = function (o) {
+    o.id = this.wid; o.channel = 'widget';
+    try { this.f.contentWindow.postMessage(JSON.stringify(o), '*'); } catch (e) {}
+  };
+  RawPlayer.prototype.ola = function () { this.envia({ event: 'listening' }); };
+  RawPlayer.prototype.cmd = function (fn, args) { this.envia({ event: 'command', func: fn, args: args || [] }); };
+  RawPlayer.prototype.mescla = function (inf) {
+    if (!inf || typeof inf !== 'object') return;
+    for (var k in inf) if (inf.hasOwnProperty(k)) this.info[k] = inf[k];
+    if (typeof inf.playerState === 'number') this.muda(inf.playerState);
+  };
+  RawPlayer.prototype.muda = function (st) {
+    if (st === this.st) return;
+    this.st = st;
+    this.info.playerState = st;
+    if (this.ready && this.ev.onStateChange) this.ev.onStateChange({ data: st });
+  };
+  RawPlayer.prototype.pronto = function () {
+    if (this.ready) return;
+    this.ready = true;
+    this.cmd('addEventListener', ['onStateChange']);
+    this.cmd('addEventListener', ['onError']);
+    if (this.ev.onReady) this.ev.onReady({ target: this });
+    if (this.st > -2 && this.ev.onStateChange) this.ev.onStateChange({ data: this.st });
+  };
+  RawPlayer.prototype.recebe = function (e) {
+    if (!this.f || e.source !== this.f.contentWindow) return;
+    var d = e.data;
+    if (typeof d === 'string') { try { d = JSON.parse(d); } catch (x) { return; } }
+    if (!d || !d.event) return;
+    this.got = true; this.nmsg++;
+    if (d.event === 'initialDelivery' || d.event === 'onReady') { this.mescla(d.info); this.pronto(); }
+    else if (d.event === 'infoDelivery') { this.mescla(d.info); this.pronto(); }
+    else if (d.event === 'onStateChange') { if (typeof d.info === 'number') this.muda(d.info); }
+    else if (d.event === 'onError') { if (this.ev.onError) this.ev.onError({ data: d.info }); }
+  };
+  RawPlayer.prototype.playVideo = function () { this.cmd('playVideo'); };
+  RawPlayer.prototype.pauseVideo = function () { this.cmd('pauseVideo'); };
+  RawPlayer.prototype.stopVideo = function () { this.cmd('stopVideo'); };
+  RawPlayer.prototype.seekTo = function (t, a) { this.info.currentTime = t; this.cmd('seekTo', [t, a !== false]); };
+  RawPlayer.prototype.loadVideoById = function (o) {
+    this.info.currentTime = 0; this.info.duration = 0; this.info.videoData = null; this.st = -2;
+    this.cmd('loadVideoById', [o]);
+  };
+  RawPlayer.prototype.getCurrentTime = function () { return +this.info.currentTime || 0; };
+  RawPlayer.prototype.getDuration = function () { return +this.info.duration || 0; };
+  RawPlayer.prototype.getVideoData = function () { return this.info.videoData || {}; };
+  RawPlayer.prototype.getPlaybackQuality = function () { return this.info.playbackQuality || ''; };
+  RawPlayer.prototype.getAvailableQualityLevels = function () { return this.info.availableQualityLevels || []; };
+  RawPlayer.prototype.setPlaybackQuality = function (q) { this.cmd('setPlaybackQuality', [q]); };
+  RawPlayer.prototype.setPlaybackQualityRange = function (a, b) { this.cmd('setPlaybackQualityRange', [a, b]); };
+  RawPlayer.prototype.loadModule = function (m) { this.cmd('loadModule', [m]); };
+  RawPlayer.prototype.unloadModule = function (m) { this.cmd('unloadModule', [m]); };
+  RawPlayer.prototype.setOption = function (m, k, v) { this.cmd('setOption', [m, k, v]); };
+  RawPlayer.prototype.getIframe = function () { return this.f; };
+  RawPlayer.prototype.destroy = function () {
+    clearInterval(this.t);
+    window.removeEventListener('message', this.h, false);
+    if (this.f && this.f.parentNode) this.f.parentNode.removeChild(this.f);
+    this.f = null;
+    if (rawAtual === this) rawAtual = null;
+  };
   // ---- player (com o "caractere do endereço", igual ao app) ----
   function hostDe(c) { return c && c !== 'none' ? 'https://www.yout' + c + 'ube.com' : undefined; }
   function criaPlayer(id, s) {
@@ -207,10 +311,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
       events: { onReady: onPronto, onStateChange: onEstado, onError: onErro }
     };
     var h = hostDe(chrAtivo);
-    if (h) cfg.host = h;
-    P = new YT.Player('player', cfg);
+    if (h) { cfg.host = h; cfg.el = 'player'; $('player').parentNode.removeChild($('player')); $('pw').innerHTML = ''; var dv = document.createElement('div'); dv.id = 'player'; $('pw').appendChild(dv); P = new RawPlayer(cfg); }
+    else P = new YT.Player('player', cfg);
     clearTimeout(hostT);
-    if (h) hostT = setTimeout(function () {
+    if (h && !dbg) hostT = setTimeout(function () {
       if (pronto) return;
       semHost = true;   // o endereço especial não abriu nesta TV: volta ao normal
       mensagem('O endereço especial não carregou nesta TV. Usando o endereço normal.', 6000);
@@ -232,7 +336,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     er = 0; ps = 3;
     s = Math.max(0, +s || 0);
     mostraPlayer(true);
-    if (!apiOk || (P && !pronto)) { pend = { id: id, t: t, s: s, o: o }; return; }
+    var usaRaw = !semHost && chr !== 'none';
+    if ((!usaRaw && !apiOk) || (P && !pronto)) { pend = { id: id, t: t, s: s, o: o }; return; }
     if (P && chrAtivo !== (semHost ? 'none' : chr)) {   // o caractere mudou: recria o player
       com(function () { P.destroy(); });
       P = null; pronto = false;
