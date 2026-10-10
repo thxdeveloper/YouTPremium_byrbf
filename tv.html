@@ -91,7 +91,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
 
   // ---- estado ----
   var P = null, pronto = false, apiOk = false, pend = null, visivel = false;
-  var hostCh = '', qual = 'auto', qualKey = '';
   var cur = { id: '', t: '' }, ps = -1, er = 0;
   var proxId = '', proxT = '';
   var lastN = 0, primeira = true;
@@ -145,7 +144,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   // ---- player do YouTube ----
   function onEstado(e) {
     ps = e.data;
-    if (ps === 1) { var k = cur.id + '|' + qual; if (k !== qualKey) { qualKey = k; aplicaQ(); } }
     if (ps === 0) fim();
     ovMostra();
     grava();
@@ -168,7 +166,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     if (!apiOk || (P && !pronto)) { pend = { id: id, t: t, s: s }; return; }
     if (!P) {
       P = new YT.Player('player', {
-        width: '100%', height: '100%', videoId: id, host: hostCh ? 'https://www.yout' + hostCh + 'ube.com' : undefined,
+        width: '100%', height: '100%', videoId: id,
         playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, iv_load_policy: 3, start: Math.floor(s) },
         events: { onReady: onPronto, onStateChange: onEstado, onError: onErro }
       });
@@ -185,13 +183,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     if (proxId) tocaProximo();
     else { mostraPlayer(false); mensagem('Fim da reprodução', 4000); }
   }
-  function trocaHost(ch) {
-    ch = (!ch || ch === 'none') ? '' : String(ch);
-    if (ch === hostCh) return;
-    hostCh = ch;
-    if (P) { com(function () { P.destroy(); }); P = null; pronto = false; pend = null; $('pw').innerHTML = '<div id="player"></div>'; }
-  }
-  function aplicaQ() { com(function () { if (P && pronto) P.setPlaybackQuality(qual === 'auto' ? 'default' : qual); }); }
   function para() {
     com(function () { if (P && pronto) P.stopVideo(); });
     cur = { id: '', t: '' }; ps = -1; proxId = ''; proxT = ''; pend = null;
@@ -210,13 +201,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   function exec(c) {
     ultimoCel = new Date().getTime();
     var a = c.a;
-    if (a === 'load') { trocaHost(c.ch); if (c.q) qual = c.q; qualKey = ''; carrega(c.id, c.t, c.s); proxId = c.ni || ''; proxT = c.nt || ''; }
+    if (a === 'load') { carrega(c.id, c.t, c.s); proxId = c.ni || ''; proxT = c.nt || ''; }
     else if (a === 'nxt') { proxId = c.ni || ''; proxT = c.nt || ''; }
     else if (a === 'play') com(function () { P.playVideo(); });
     else if (a === 'pause') com(function () { P.pauseVideo(); });
     else if (a === 'seek') com(function () { P.seekTo(+c.s || 0, true); });
     else if (a === 'rel') com(function () { P.seekTo(Math.max(0, P.getCurrentTime() + (+c.s || 0)), true); });
-    else if (a === 'q') { qual = c.q || 'auto'; aplicaQ(); }
     else if (a === 'stop') para();
     if (a === 'seek' || a === 'rel' || a === 'play' || a === 'pause') ovMostra();
     atualizaStatus();
@@ -239,8 +229,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     if (P && pronto && cur.id) com(function () {
       o.ct = Math.floor(P.getCurrentTime() || 0);
       o.du = Math.floor(P.getDuration() || 0);
-      o.q = P.getPlaybackQuality ? String(P.getPlaybackQuality() || '') : '';
-      o.ql = P.getAvailableQualityLevels ? (P.getAvailableQualityLevels() || []).join(',').slice(0, 100) : '';
       if (!cur.t) {
         var d = P.getVideoData && P.getVideoData();
         if (d && d.title) { cur.t = d.title; o.t = cur.t.slice(0, 150); }
