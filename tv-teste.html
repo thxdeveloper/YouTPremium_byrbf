@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>YT Premium - Teste da TV</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body{margin:0;background:#0a0a0c;color:#f5f3ef;font-family:Arial,Helvetica,sans-serif}
+body{padding:22px 28px}
+h1{font-size:34px;margin:0 0 6px}
+h1 b{color:#ff3b3b}
+.sub{color:#9a9aa8;font-size:18px;margin:0 0 14px}
+table{border-collapse:collapse}
+td{vertical-align:top}
+#rs{width:100%}
+#rs td{padding:6px 14px 6px 0;font-size:21px;border-bottom:1px solid #26262f}
+.ok{color:#3ddc84;font-weight:bold}
+.no{color:#ff5a5a;font-weight:bold}
+.wt{color:#f4c152}
+.nt{font-weight:normal;color:#9a9aa8;font-size:15px}
+#ua{font-size:14px;color:#9a9aa8;margin-top:10px;word-wrap:break-word}
+#er{font-size:16px;color:#ff5a5a;margin-top:8px}
+#pw{width:480px;height:270px;background:#000}
+button{font-size:24px;padding:14px 26px;border-radius:12px;border:3px solid #ff3b3b;background:#ff3b3b;color:#fff;font-weight:bold;margin-top:14px}
+button:focus{outline:4px solid #fff}
+</style>
+</head>
+<body>
+<h1><b>YT</b> Premium - Teste da TV</h1>
+<div class="sub">Aperte OK no botao vermelho, espere uns 15 segundos e tire uma foto desta tela.</div>
+<table style="width:100%"><tr>
+<td style="width:56%"><table id="rs"></table><div id="ua"></div><div id="er"></div></td>
+<td style="padding-left:22px">
+<div id="pw"><div id="player"></div></div>
+<button id="btn">Tocar video de teste</button>
+<div class="sub" id="st" style="margin-top:12px">Estado do player: aguardando</div>
+</td></tr></table>
+<script>
+(function () {
+  var rs = document.getElementById('rs');
+  var topico = 'ytp' + Math.floor(Math.random() * 1e9);
+  var pl = null, tocou = false;
+
+  function linha(id, nome) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + nome + '</td><td id="' + id + '" class="wt">testando...</td>';
+    rs.appendChild(tr);
+  }
+  function res(id, ok, txt) {
+    var e = document.getElementById(id);
+    if (!e) return;
+    e.className = ok ? 'ok' : 'no';
+    e.innerHTML = (ok ? 'OK' : 'FALHOU') + (txt ? ' <span class="nt">' + txt + '</span>' : '');
+  }
+  function limite(id, ms, msg) {
+    setTimeout(function () {
+      var e = document.getElementById(id);
+      if (e && e.className === 'wt') res(id, false, msg || 'sem resposta');
+    }, ms);
+  }
+
+  window.onerror = function (m, u, l) {
+    document.getElementById('er').innerHTML = 'Erro: ' + m + ' (linha ' + l + ')';
+  };
+
+  linha('t_tela', 'Tela');
+  linha('t_es6', 'JavaScript moderno');
+  linha('t_fetch', 'fetch e Promise');
+  linha('t_ls', 'Memoria (localStorage)');
+  linha('t_img', 'Internet segura (HTTPS)');
+  linha('t_ws', 'WebSocket (tempo real)');
+  linha('t_sse', 'EventSource (tempo real)');
+  linha('t_rtc', 'WebRTC');
+  linha('t_api', 'API do YouTube');
+  linha('t_play', 'Video toca');
+
+  document.getElementById('ua').innerHTML = 'Navegador: ' + navigator.userAgent;
+
+  // Tela
+  var w = window.innerWidth, h = window.innerHeight, d = window.devicePixelRatio || 1;
+  res('t_tela', true, w + ' x ' + h + ' (escala ' + d + ')');
+
+  // ES6
+  try {
+    var f = new Function('var a=function(x){return x};var b=(x)=>x;let y=1;return b(y)===1&&typeof Symbol!=="undefined"');
+    res('t_es6', !!f(), '');
+  } catch (e) { res('t_es6', false, 'navegador antigo'); }
+
+  // fetch/Promise
+  res('t_fetch', typeof fetch === 'function' && typeof Promise === 'function', '');
+
+  // localStorage
+  try { localStorage.setItem('t', '1'); res('t_ls', localStorage.getItem('t') === '1', ''); }
+  catch (e) { res('t_ls', false, ''); }
+
+  // HTTPS (imagem do servidor do Google)
+  var im = new Image();
+  im.onload = function () { res('t_img', true, ''); };
+  im.onerror = function () { res('t_img', false, 'certificado ou rede'); };
+  im.src = 'https://i.ytimg.com/vi/jNQXAC9IVRw/default.jpg?x=' + topico;
+  limite('t_img', 10000, 'sem resposta');
+
+  // WebSocket
+  try {
+    var ws = new WebSocket('wss://ntfy.sh/' + topico + '/ws');
+    ws.onopen = function () { res('t_ws', true, ''); try { ws.close(); } catch (e) {} };
+    ws.onerror = function () { res('t_ws', false, 'erro'); };
+  } catch (e) { res('t_ws', false, 'nao suportado'); }
+  limite('t_ws', 10000);
+
+  // EventSource
+  try {
+    var es = new EventSource('https://ntfy.sh/' + topico + '/sse');
+    es.onopen = function () { res('t_sse', true, ''); try { es.close(); } catch (e) {} };
+    es.onerror = function () { res('t_sse', false, 'erro'); };
+  } catch (e) { res('t_sse', false, 'nao suportado'); }
+  limite('t_sse', 10000);
+
+  // WebRTC
+  res('t_rtc', !!(window.RTCPeerConnection || window.webkitRTCPeerConnection), '');
+
+  // YouTube
+  var nomes = { '-1': 'nao iniciado', '0': 'terminou', '1': 'TOCANDO', '2': 'pausado', '3': 'carregando', '5': 'na fila' };
+  var st = document.getElementById('st');
+  function estado(t) { st.innerHTML = 'Estado do player: ' + t; }
+
+  window.onYouTubeIframeAPIReady = function () {
+    res('t_api', true, '');
+    try {
+      pl = new YT.Player('player', {
+        width: 480, height: 270, videoId: 'jNQXAC9IVRw',
+        playerVars: { playsinline: 1, rel: 0 },
+        events: {
+          onReady: function () { estado('pronto, aperte OK no botao'); },
+          onStateChange: function (e) {
+            estado(nomes[String(e.data)] || e.data);
+            if (e.data === 1 && !tocou) { tocou = true; res('t_play', true, ''); }
+          },
+          onError: function (e) {
+            estado('erro ' + e.data);
+            res('t_play', false, 'erro ' + e.data);
+          }
+        }
+      });
+    } catch (x) { res('t_api', false, 'player nao abriu'); }
+  };
+  var s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  s.onerror = function () { res('t_api', false, 'script bloqueado'); };
+  document.getElementsByTagName('head')[0].appendChild(s);
+  limite('t_api', 12000, 'nao carregou');
+  setTimeout(function () {
+    var a = document.getElementById('t_api'), p = document.getElementById('t_play');
+    if (a && p && a.className === 'no' && p.className === 'wt') res('t_play', false, 'depende da API do YouTube');
+  }, 13000);
+
+  var btn = document.getElementById('btn');
+  btn.onclick = function () {
+    if (pl && pl.playVideo) { try { pl.playVideo(); } catch (e) {} }
+    else estado('API ainda nao carregou');
+    setTimeout(function () {
+      var e = document.getElementById('t_play');
+      if (e && e.className === 'wt') res('t_play', false, 'nao tocou em 15s');
+    }, 15000);
+  };
+  try { btn.focus(); } catch (e) {}
+})();
+</script>
+</body>
+</html>
