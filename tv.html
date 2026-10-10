@@ -95,6 +95,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   var proxId = '', proxT = '';
   var lastN = 0, primeira = true;
   var falhas = 0, srvOk = false, ultimoCel = 0, ultimoErro = '';
+  var chr = 'none', chrAtivo = 'none', semHost = false, qSel = 'auto', ccOn = false, slim = false, hostT = 0;
+  var ORD = ['highres', 'hd2880', 'hd2160', 'hd1440', 'hd1080', 'hd720', 'large', 'medium', 'small', 'tiny'];
 
   // ---- interface ----
   function mensagem(t, ms) {
@@ -144,6 +146,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   // ---- player do YouTube ----
   function onEstado(e) {
     ps = e.data;
+    if (ps === 1) { setTimeout(aplicaQ, 700); setTimeout(aplicaQ, 4000); setTimeout(aplicaCC, 700); setTimeout(aplicaCC, 3000); }
     if (ps === 0) fim();
     ovMostra();
     grava();
@@ -155,22 +158,87 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   }
   function onPronto() {
     pronto = true;
-    if (pend) { var p = pend; pend = null; carrega(p.id, p.t, p.s); }
+    clearTimeout(hostT);
+    if (pend) { var p = pend; pend = null; carrega(p.id, p.t, p.s, p.o); }
+    else { aplicaQ(); aplicaCC(); }
   }
-  function carrega(id, t, s) {
+  // ---- qualidade e legenda ----
+  function niveis() {
+    var l = [];
+    com(function () { l = P.getAvailableQualityLevels() || []; });
+    return l.filter(function (x) { return x !== 'auto'; });
+  }
+  function melhor(l) {
+    for (var i = 0; i < ORD.length; i++) if (l.indexOf(ORD[i]) >= 0) return ORD[i];
+    return '';
+  }
+  function aplicaQ() {
+    if (!P || !pronto || !cur.id) return;
+    var alvo = qSel;
+    if (alvo === 'max') alvo = melhor(niveis()) || 'highres';
+    if (alvo === 'auto') {
+      com(function () { if (P.setPlaybackQualityRange) P.setPlaybackQualityRange('tiny', 'highres'); });
+      com(function () { P.setPlaybackQuality('default'); });
+      return;
+    }
+    com(function () { P.setPlaybackQuality(alvo); });
+    com(function () { if (P.setPlaybackQualityRange) P.setPlaybackQualityRange(alvo, alvo); });
+  }
+  function aplicaCC() {
+    if (!P || !pronto || !cur.id) return;
+    if (ccOn) {
+      com(function () { P.loadModule('captions'); });
+      com(function () { P.loadModule('cc'); });
+    } else {
+      com(function () { P.setOption('captions', 'track', {}); });
+      com(function () { P.unloadModule('captions'); });
+      com(function () { P.unloadModule('cc'); });
+    }
+  }
+  // ---- player (com o "caractere do endereço", igual ao app) ----
+  function hostDe(c) { return c && c !== 'none' ? 'https://www.yout' + c + 'ube.com' : undefined; }
+  function criaPlayer(id, s) {
+    chrAtivo = semHost ? 'none' : chr;
+    pronto = false;
+    $('pw').innerHTML = '<div id="player"></div>';
+    var cfg = {
+      width: '100%', height: '100%', videoId: id,
+      playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, iv_load_policy: 3, cc_load_policy: ccOn ? 1 : 0, start: Math.floor(s) },
+      events: { onReady: onPronto, onStateChange: onEstado, onError: onErro }
+    };
+    var h = hostDe(chrAtivo);
+    if (h) cfg.host = h;
+    P = new YT.Player('player', cfg);
+    clearTimeout(hostT);
+    if (h) hostT = setTimeout(function () {
+      if (pronto) return;
+      semHost = true;   // o endereço especial não abriu nesta TV: volta ao normal
+      mensagem('O endereço especial não carregou nesta TV. Usando o endereço normal.', 6000);
+      com(function () { P.destroy(); });
+      P = null; pronto = false;
+      if (cur.id) carrega(cur.id, cur.t, 0, {});
+    }, 12000);
+  }
+  function carrega(id, t, s, o) {
     if (!/^[\w-]{11}$/.test(id || '')) return;
+    o = o || {};
+    if (o.ch !== undefined && o.ch !== null) {
+      var nc = String(o.ch || 'none').slice(0, 5);
+      if (nc !== chr) { chr = nc; semHost = false; }
+    }
+    if (o.q) qSel = o.q;
+    if (o.cc !== undefined && o.cc !== null) ccOn = !!+o.cc;
     cur = { id: id, t: t || '' };
     er = 0; ps = 3;
     s = Math.max(0, +s || 0);
     mostraPlayer(true);
-    if (!apiOk || (P && !pronto)) { pend = { id: id, t: t, s: s }; return; }
-    if (!P) {
-      P = new YT.Player('player', {
-        width: '100%', height: '100%', videoId: id,
-        playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, iv_load_policy: 3, start: Math.floor(s) },
-        events: { onReady: onPronto, onStateChange: onEstado, onError: onErro }
-      });
-    } else com(function () { P.loadVideoById({ videoId: id, startSeconds: s }); });
+    if (!apiOk || (P && !pronto)) { pend = { id: id, t: t, s: s, o: o }; return; }
+    if (P && chrAtivo !== (semHost ? 'none' : chr)) {   // o caractere mudou: recria o player
+      com(function () { P.destroy(); });
+      P = null; pronto = false;
+    }
+    if (!P) criaPlayer(id, s);
+    else com(function () { P.loadVideoById({ videoId: id, startSeconds: s }); });
     ovMostra();
   }
   function tocaProximo() {
@@ -190,7 +258,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   }
   window.onYouTubeIframeAPIReady = function () {
     apiOk = true;
-    if (pend) { var p = pend; pend = null; carrega(p.id, p.t, p.s); }
+    if (pend) { var p = pend; pend = null; carrega(p.id, p.t, p.s, p.o); }
   };
   var sc = document.createElement('script');
   sc.src = 'https://www.youtube.com/iframe_api';
@@ -201,13 +269,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
   function exec(c) {
     ultimoCel = new Date().getTime();
     var a = c.a;
-    if (a === 'load') { carrega(c.id, c.t, c.s); proxId = c.ni || ''; proxT = c.nt || ''; }
+    if (a === 'load') { carrega(c.id, c.t, c.s, { ch: c.ch, q: c.q, cc: c.cc }); proxId = c.ni || ''; proxT = c.nt || ''; }
     else if (a === 'nxt') { proxId = c.ni || ''; proxT = c.nt || ''; }
     else if (a === 'play') com(function () { P.playVideo(); });
     else if (a === 'pause') com(function () { P.pauseVideo(); });
     else if (a === 'seek') com(function () { P.seekTo(+c.s || 0, true); });
     else if (a === 'rel') com(function () { P.seekTo(Math.max(0, P.getCurrentTime() + (+c.s || 0)), true); });
     else if (a === 'stop') para();
+    else if (a === 'q') { qSel = c.q || 'auto'; aplicaQ(); setTimeout(aplicaQ, 1500); }
+    else if (a === 'cc') { ccOn = !!+c.v; aplicaCC(); setTimeout(aplicaCC, 1500); }
     if (a === 'seek' || a === 'rel' || a === 'play' || a === 'pause') ovMostra();
     atualizaStatus();
     setTimeout(grava, 400);
@@ -225,15 +295,18 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
 
   // ---- estado enviado ao celular ----
   function estado() {
-    var o = { ts: { '.sv': 'timestamp' }, v: 1, n: lastN, ps: ps, id: cur.id, t: (cur.t || '').slice(0, 150), ct: 0, du: 0, nx: proxId, er: er };
+    var o = { ts: { '.sv': 'timestamp' }, v: 1, n: lastN, ps: ps, id: cur.id, t: (cur.t || '').slice(0, 150), ct: 0, du: 0, nx: proxId, er: er, q: '', ql: '', cc: ccOn ? 1 : 0, hs: semHost ? 2 : (chrAtivo !== 'none' ? 1 : 0) };
     if (P && pronto && cur.id) com(function () {
       o.ct = Math.floor(P.getCurrentTime() || 0);
       o.du = Math.floor(P.getDuration() || 0);
+      o.q = P.getPlaybackQuality() || '';
+      o.ql = niveis().join(',');
       if (!cur.t) {
         var d = P.getVideoData && P.getVideoData();
         if (d && d.title) { cur.t = d.title; o.t = cur.t.slice(0, 150); }
       }
     });
+    if (slim) { delete o.q; delete o.ql; delete o.cc; delete o.hs; }
     return o;
   }
   var gBusy = false, gDirty = false;
@@ -242,7 +315,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#060606;color:#f5f3ef;
     gBusy = true; gDirty = false;
     req('PUT', '/salas/' + code + '/tv', estado(), function (err) {
       gBusy = false;
-      aval(err);
+      if (err && (+err === 401 || +err === 403) && !slim) { slim = true; gDirty = true; mensagem('O banco recusou campos novos. Usando o modo simples.', 5000); }
+      else aval(err);
       if (gDirty) grava();
     });
   }

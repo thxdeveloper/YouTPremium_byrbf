@@ -135,9 +135,9 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 #ctv{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px;text-align:center;color:#fff;background:radial-gradient(ellipse at center,#2a0d11,#000 72%)}
 #ctv svg{color:#ff3b3b;flex:none}#ctv b{font-size:17px;color:#fff}#ctv small{color:#b5c7d9;font-size:13px}
 .mini #ctv{padding:0}
-#sk,#bq{display:none}
+#sk,#bq,#bc{display:none}
 .casting #pl.full #sk{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:13px;color:var(--mut)}
-.casting #pl.full #bq{display:block;width:100%;margin-top:12px;font-weight:600}
+.casting #pl.full #bq,.casting #pl.full #bc{display:block;width:100%;margin-top:12px;font-weight:600}
 #sk span{min-width:40px;text-align:center;font-variant-numeric:tabular-nums}
 #skr{flex:1;min-width:0;width:auto;height:30px;padding:0;border:0;background:none;accent-color:var(--ac)}
 .mini #ctv b,.mini #ctv small{display:none}.mini #ctv svg{width:28px;height:28px}
@@ -172,7 +172,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 </main>
 <div id="pl"><div id="tp" class="fo"><button id="bb">‹ Voltar</button></div><div id="pw"><div id="yt"></div></div>
 <div id="pc"><div id="pt"></div>
-<div class="fo" id="sk"><span id="sk1">0:00</span><input type="range" id="skr" min="0" max="1000" value="0" aria-label="Posição do vídeo"><span id="sk2">0:00</span></div><button class="fo" id="bq">Qualidade: Automática</button>
+<div class="fo" id="sk"><span id="sk1">0:00</span><input type="range" id="skr" min="0" max="1000" value="0" aria-label="Posição do vídeo"><span id="sk2">0:00</span></div><button class="fo" id="bq">Qualidade: Automática</button><button class="fo" id="bc">Legendas: Desativadas</button>
 <div class="fo bt"><button id="bv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>Salvar</button><button id="bp"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor"/></svg>Miniatura</button><button id="bz"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Tela cheia</button><button id="bm"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Fechar</button><button id="bt"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="12.5" rx="2"/><path d="M8 21h8M12 17.5V21"/></svg><span id="btl">Transmitir para a TV</span></button></div>
 <div class="fo tr"><button id="tv" aria-label="Anterior"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button id="tp2" class="big" aria-label="Tocar ou pausar"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><button id="tn" aria-label="Próximo"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button></div>
 <button class="mo x" id="mv" aria-label="Anterior"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button class="mo x" id="mp">⏯</button><button class="mo x" id="mn" aria-label="Próximo"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button><button class="mo x" id="mx">✕</button></div></div>
@@ -442,9 +442,11 @@ var TVDB="https://yt-premium-10236-default-rtdb.firebaseio.com";
 var T={on:false,code:"",n:0,ts:null,tch:0,grace:0,off:0,loop:0,hb:0,tick:0,last:""};
 try{T.last=localStorage.getItem("vtv")||""}catch(e){}
 T.q="auto";T.ql="";T.qa="";try{T.q=localStorage.getItem("vtq")||"auto"}catch(e){}
-var QO=[["auto","Automática"],["medium","360p"],["large","480p"],["hd720","720p HD"],["hd1080","1080p Full HD"]];
-var QS={tiny:"144p",small:"240p",medium:"360p",large:"480p",hd720:"720p",hd1080:"1080p",hd1440:"1440p",hd2160:"2160p",highres:"4K+"};
-function qNome(v){for(var i=0;i<QO.length;i++)if(QO[i][0]==v)return QO[i][1];return v}
+var QO=[["auto","Automática"],["max","Máxima disponível"],["medium","360p"],["large","480p"],["hd720","720p HD"],["hd1080","1080p Full HD"]];
+var QORD=["highres","hd2880","hd2160","hd1440","hd1080","hd720","large","medium","small","tiny"];
+T.cc=0;try{T.cc=+localStorage.getItem("vtc")||0}catch(x){}
+var QS={tiny:"144p",small:"240p",medium:"360p",large:"480p",hd720:"720p",hd1080:"1080p",hd1440:"1440p",hd2160:"2160p",hd2880:"2880p",highres:"4K+"};
+function qNome(v){for(var i=0;i<QO.length;i++)if(QO[i][0]==v)return QO[i][1];return QS[v]||v}
 function tReq(m,p,b){var o={method:m};if(b!==undefined){o.headers={"Content-Type":"application/json"};o.body=JSON.stringify(b)}
 return fetch(TVDB+p+".json",o).then(function(r){if(!r.ok)throw new Error(String(r.status));return r.json()})}
 function tCut(s){return String(s||"").slice(0,120)}
@@ -459,7 +461,7 @@ function tUi(){var on=T.on,s=$("tvs");
 if(s)s.textContent=on?"Conectado à TV "+tFmtCod(T.code)+". Tudo que você tocar vai para a TV.":"Na TV, abra https://thxdeveloper.github.io/YouTPremium_byrbf/tv.html e digite aqui o código que aparecer.";
 $("tvc").textContent=on?"Trocar de TV":"Conectar à TV";$("tvd").style.display=on?"":"none";
 $("bt").classList.toggle("on",on);document.body.classList.toggle("casting",on);
-$("bq").textContent="Qualidade: "+qNome(T.q)+(T.q=="auto"&&QS[T.qa]?" ("+QS[T.qa]+")":"");$("btl").textContent=on?"Transmitindo para a TV":"Transmitir para a TV"}
+$("bq").textContent="Qualidade: "+qNome(T.q)+(T.q=="auto"&&QS[T.qa]?" ("+QS[T.qa]+")":"");$("bc").textContent="Legendas: "+(T.cc?"Ativadas":"Desativadas");$("btl").textContent=on?"Transmitindo para a TV":"Transmitir para a TV"}
 
 /* janelas */
 var sh0=sh;sh=function(t){var n=$("shn");n.inputMode="";n.removeAttribute("maxlength");sh0(t)};
@@ -471,9 +473,12 @@ function tMenu(){menu("Transmitindo para a TV "+tFmtCod(T.code),[
 {l:"Trocar de TV (outro código)",f:tDialog}])}
 $("bt").onclick=function(e){e.stopPropagation();T.on?tMenu():tDialog()};
 $("tvc").onclick=tDialog;
-$("bq").onclick=function(e){e.stopPropagation();var av=T.ql?T.ql.split(","):[];
-menu("Qualidade do vídeo na TV",QO.filter(function(o){return o[0]=="auto"||!av.length||av.indexOf(o[0])>=0}).map(function(o){
+$("bq").onclick=function(e){e.stopPropagation();var av=T.ql?T.ql.split(","):["hd1080","hd720","large","medium"];
+var L=[["auto","Automática"],["max","Máxima disponível"+(T.ql?" ("+(QS[QORD.filter(function(k){return av.indexOf(k)>=0})[0]]||"?")+")":"")]];
+QORD.forEach(function(k){if(av.indexOf(k)>=0)L.push([k,(QS[k]||k)+(k=="hd720"?" HD":k=="hd1080"?" Full HD":"")])});
+menu("Qualidade do vídeo na TV",L.map(function(o){
 return{l:(T.q==o[0]?"✓ ":"")+o[1],f:function(){T.q=o[0];try{localStorage.setItem("vtq",o[0])}catch(x){}tSend({a:"q",q:o[0]});tUi();msg("Qualidade: "+o[1]+". A TV pode demorar a trocar.")}}}))};
+$("bc").onclick=function(e){e.stopPropagation();T.cc=T.cc?0:1;try{localStorage.setItem("vtc",T.cc)}catch(x){}tSend({a:"cc",v:T.cc});tUi();msg(T.cc?"Legendas ativadas na TV (se o vídeo tiver).":"Legendas desativadas na TV.")};
 var SKD=false;
 $("skr").oninput=function(){SKD=true;$("sk1").textContent=fmt(Math.floor((M.du||0)*this.value/1000))};
 $("skr").onchange=function(){var s=Math.floor((M.du||0)*this.value/1000);SKD=false;if(M.du>0)cmd("seekTo",[s,true])};
@@ -520,7 +525,7 @@ if(novo){if(T.ql!==(j.ql||"")||T.qa!==(j.q||"")){T.ql=j.ql||"";T.qa=j.q||"";tUi(
 var antes=M.ps;M.ps=j.ps;M.ct=j.ct||0;M.du=j.du||M.du||0;
 if(antes!==0&&j.ps===0){salvarPos(true);want=false;try{a.pause()}catch(e){}}}
 var nm={"-1":"Parado","0":"Terminou","1":"Tocando","2":"Pausado","3":"Carregando","5":"Pronto"};
-if(cs)cs.textContent=j.er?"Erro no vídeo ("+j.er+")":((nm[String(M.ps)]||"")+(QS[T.qa]&&M.ps==1?" · "+QS[T.qa]:""))}
+if(cs)cs.textContent=j.er?"Erro no vídeo ("+j.er+")":((nm[String(M.ps)]||"")+(QS[T.qa]&&M.ps==1?" · "+QS[T.qa]:"")+(j.hs==2?" · endereço normal":""))}
 function tAdota(j){var q=fila(),nx=q&&q.l[q.i+1];
 if(nx&&nx.id===j.id){q.i++;cur={id:nx.id,t:nx.t||j.t||nx.id}}else{Q=null;cur={id:j.id,t:j.t||j.id}}
 M.ct=0;M.du=0;M.fin=null;RES=null;
@@ -536,7 +541,7 @@ var s=pos!=null?pos:(zero?0:st0(id));RES=null;
 kill();$("pw").innerHTML=CTV;$("pt").textContent=cur.t;full();
 want=true;try{a.play().catch(function(){})}catch(e){}
 M.ps=3;M.ct=s;M.du=0;T.grace=Date.now()+5000;
-var n=tNext();tSend({a:"load",id:id,t:tCut(cur.t),s:Math.floor(s),ni:n.ni,nt:n.nt,ch:S.chr||"none",q:T.q});
+var n=tNext();tSend({a:"load",id:id,t:tCut(cur.t),s:Math.floor(s),ni:n.ni,nt:n.nt,ch:S.chr||"none",q:T.q,cc:T.cc});
 setMeta();var cs=$("ctvs");if(cs)cs.textContent="Carregando";
 if(!t)fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)).then(function(r){return r.json()}).then(function(j){if(cur&&cur.id==id)setT(j.title)}).catch(function(){})}
 
