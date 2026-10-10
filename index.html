@@ -128,6 +128,13 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 .ab dt{color:var(--mut);flex:none}
 .ab dd{margin:0;text-align:right;font-weight:600;min-width:0;overflow-wrap:anywhere}
 .ab .af{padding:12px 16px;border-top:1px solid var(--line);text-align:center;font-size:12px;color:var(--mut)}
+
+/* ===== v4: transmitir para a TV ===== */
+#bt{grid-column:1/-1;flex-direction:row!important;gap:10px!important;padding:13px 10px!important;font-size:13.5px!important}
+#bt.on{border-color:var(--ac)}#bt.on span{color:var(--ac)}
+#ctv{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px;text-align:center;color:#fff;background:radial-gradient(ellipse at center,#2a0d11,#000 72%)}
+#ctv svg{color:#ff3b3b;flex:none}#ctv b{font-size:17px;color:#fff}#ctv small{color:#b5c7d9;font-size:13px}
+.mini #ctv{padding:0}.mini #ctv b,.mini #ctv small{display:none}.mini #ctv svg{width:28px;height:28px}
 </style></head><body>
 <main>
 <section class="tab on" id="tb"><div class="brand"><div class="bn"><b><i>YT</i> Premium</b><small id="tgl">Seu conteúdo favorito,<br>sem limites.</small></div></div>
@@ -144,6 +151,9 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 <textarea id="ks" rows="4"></textarea>
 <button class="pri" id="tk">Testar chaves</button><div id="ko" class="sub"></div>
 <div class="sub">Caractere do endereço (opcional)</div><input id="ch" maxlength="5">
+<div class="gh">Transmitir para a TV</div>
+<div class="sub" id="tvs"></div>
+<div class="row2"><button class="pri" id="tvc">Conectar à TV</button><button class="sec" id="tvd" style="display:none">Desconectar</button></div>
 <div class="gh">Dados</div>
 <div class="sub" id="us"></div><button id="lc" class="sec" style="width:100%;margin-top:6px">Limpar cache de buscas</button>
 <div class="sub">Backup dos seus dados (playlists, posições e chaves)</div><div class="row2"><button class="pri" id="bk">Copiar backup</button><button class="sec" id="rs">Restaurar</button></div>
@@ -156,7 +166,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 </main>
 <div id="pl"><div id="tp" class="fo"><button id="bb">‹ Voltar</button></div><div id="pw"><div id="yt"></div></div>
 <div id="pc"><div id="pt"></div>
-<div class="fo bt"><button id="bv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>Salvar</button><button id="bp"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor"/></svg>Miniatura</button><button id="bz"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Tela cheia</button><button id="bm"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Fechar</button></div>
+<div class="fo bt"><button id="bv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>Salvar</button><button id="bp"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor"/></svg>Miniatura</button><button id="bz"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Tela cheia</button><button id="bm"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Fechar</button><button id="bt"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="12.5" rx="2"/><path d="M8 21h8M12 17.5V21"/></svg><span id="btl">Transmitir para a TV</span></button></div>
 <div class="fo tr"><button id="tv" aria-label="Anterior"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button id="tp2" class="big" aria-label="Tocar ou pausar"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><button id="tn" aria-label="Próximo"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button></div>
 <button class="mo x" id="mv" aria-label="Anterior"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button class="mo x" id="mp">⏯</button><button class="mo x" id="mn" aria-label="Próximo"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button><button class="mo x" id="mx">✕</button></div></div>
 <div id="sh"><div id="shb"><b>Salvar em qual playlist?</b><div id="shl" style="margin-top:8px"></div><input id="shn" placeholder="Ou crie uma nova playlist"><button class="pri" id="shk">Salvar</button></div></div>
@@ -376,7 +386,7 @@ chips();
 
 /* ===== v3.1: tema, perfil e saudação ===== */
 /* >>> VERSÃO DO APP: troque aqui a cada atualização (1.0, 1.1, 2.0...) <<< */
-var VERSAO="1.1";
+var VERSAO="1.2";
 $("ver").textContent=VERSAO;
 var FEM=" beatriz raquel rachel isabel ester esther ingrid carmen ruth liz iris miriam mirian karen sarah sara elizabeth jennifer jaqueline jacqueline nicole alice aline michele michelle simone denise rose rosane rosana suzane luciane cristiane viviane adriane daniele danielle gisele giselle priscila priscilla joice joyce janaina maite maitê raissa rayssa thais thaís lais laís rute noemi naomi eliane eloise heloise heloísa heloisa lorraine yasmin ysabel isis ísis agnes inês ines tais lilian lillian lidiane cleide neide eunice berenice solange irene marlene arlete odete celeste ";
 var MASC=" luca lucca joshua noa ilia elias jonas tomas lucas matias mathias nikita saulo josue josué jose josé ";
@@ -419,4 +429,104 @@ var rs0=$("rs").onclick;$("rs").onclick=function(){rs0.call(this);saveF();tema(S
 function centraTema(){var g=$("tms"),o=g&&g.querySelector(".tm.on");if(o&&g.clientWidth)g.scrollLeft=o.offsetLeft-(g.clientWidth-o.offsetWidth)/2}
 var tab0=tab;tab=function(n){tab0.apply(this,arguments);if(n=="a")centraTema()};
 tema(S.theme);perfil();
+
+/* ===== v4: transmitir para a TV (página tv.html, ponte via Firebase) ===== */
+var TVDB="https://yt-premium-10236-default-rtdb.firebaseio.com";
+var T={on:false,code:"",n:0,ts:null,tch:0,grace:0,off:0,loop:0,hb:0,tick:0,last:""};
+try{T.last=localStorage.getItem("vtv")||""}catch(e){}
+function tReq(m,p,b){var o={method:m};if(b!==undefined){o.headers={"Content-Type":"application/json"};o.body=JSON.stringify(b)}
+return fetch(TVDB+p+".json",o).then(function(r){if(!r.ok)throw new Error(String(r.status));return r.json()})}
+function tCut(s){return String(s||"").slice(0,120)}
+function tFmtCod(c){return c.slice(0,3)+" "+c.slice(3)}
+function tSend(o){if(!T.on)return Promise.resolve();T.n=Math.max(Date.now(),T.n+1);o.n=T.n;
+return tReq("PUT","/salas/"+T.code+"/cmd",o).catch(function(e){msg(e.message=="401"||e.message=="403"?"A TV recusou o comando ("+e.message+"). Confira as regras do banco.":"Não consegui falar com a TV.")})}
+function tNext(){var q=fila(),nx=q&&q.l[q.i+1];return nx?{ni:nx.id,nt:tCut(nx.t)}:{ni:"",nt:""}}
+
+/* textos e botões */
+var CTV='<div id="ctv"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="12.5" rx="2"/><path d="M8 21h8M12 17.5V21"/></svg><b>Transmitindo para a TV</b><small id="ctvs"></small></div>';
+function tUi(){var on=T.on,s=$("tvs");
+if(s)s.textContent=on?"Conectado à TV "+tFmtCod(T.code)+". Tudo que você tocar vai para a TV.":"Na TV, abra https://thxdeveloper.github.io/YouTPremium_byrbf/tv.html e digite aqui o código que aparecer.";
+$("tvc").textContent=on?"Trocar de TV":"Conectar à TV";$("tvd").style.display=on?"":"none";
+$("bt").classList.toggle("on",on);$("btl").textContent=on?"Transmitindo para a TV":"Transmitir para a TV"}
+
+/* janelas */
+var sh0=sh;sh=function(t){var n=$("shn");n.inputMode="";n.removeAttribute("maxlength");sh0(t)};
+function tDialog(){dlg("Código que aparece na TV","000 000",T.last?tFmtCod(T.last):"","Conectar",function(v){tConectar(String(v||"").replace(/\D/g,""))});
+var n=$("shn");n.inputMode="numeric";n.maxLength=7}
+function tMenu(){menu("Transmitindo para a TV "+tFmtCod(T.code),[
+{l:"Voltar a tocar no celular",f:function(){tDesconectar(true,true)}},
+{l:"Parar e desconectar",f:function(){tDesconectar(false,true)}},
+{l:"Trocar de TV (outro código)",f:tDialog}])}
+$("bt").onclick=function(e){e.stopPropagation();T.on?tMenu():tDialog()};
+$("tvc").onclick=tDialog;
+$("tvd").onclick=function(){tDesconectar(true,true)};
+
+/* conexão */
+function tConectar(c){if(c.length!==6)return msg("Digite os 6 números que aparecem na TV.");
+msg("Procurando a TV…");
+tReq("GET","/salas/"+c+"/tv").then(function(j){
+if(!j)return msg("Não encontrei esse código. A página da TV está aberta? Confira os números.");
+if(T.on){tSend({a:"stop"});tParaTimers()}
+T.on=true;T.code=c;T.last=c;try{localStorage.setItem("vtv",c)}catch(e){}
+T.ts=j.ts;T.tch=Date.now();T.off=0;T.grace=0;
+tIniciaTimers();tSend({a:"hi"});tUi();
+if(cur){castPlay(cur.id,cur.t,false,Math.floor(M.ct||0));msg("Conectado. Continuando na TV.")}
+else msg("Conectado à TV. Escolha um vídeo para tocar lá.")
+}).catch(function(e){msg(e.message=="401"||e.message=="403"?"O servidor recusou ("+e.message+"). Confira as regras do banco no Firebase.":"Sem conexão com o servidor.")})}
+function tIniciaTimers(){tParaTimers();T.loop=setTimeout(tPoll,300);
+T.hb=setInterval(function(){tSend({a:"hi"})},40000);
+T.tick=setInterval(function(){if(T.on&&cur&&M.ps==1&&M.du)M.ct=Math.min(M.du,(M.ct||0)+1)},1000)}
+function tParaTimers(){clearTimeout(T.loop);clearInterval(T.hb);clearInterval(T.tick)}
+function tDesconectar(resume,stop){if(!T.on)return;var code=T.code,pos=Math.floor(M.ct||0),ps=M.ps;
+if(stop){T.n=Math.max(Date.now(),T.n+1);tReq("PUT","/salas/"+code+"/cmd",{a:"stop",n:T.n}).catch(function(){})}
+T.on=false;tParaTimers();tUi();
+if(resume&&cur&&ps!==0){if(pos>5){S.pos[cur.id]=pos;savePos()}play0(cur.id,cur.t)}
+else if(cur)fechar0();
+msg(resume?"Desconectado da TV.":"Transmissão encerrada.")}
+
+/* leitura do estado da TV */
+function tPoll(){if(!T.on)return;var code=T.code;
+tReq("GET","/salas/"+code+"/tv").then(function(j){if(!T.on||T.code!==code)return;
+if(!j){msg("A TV trocou de código. Conecte de novo.");return tDesconectar(true,false)}
+tApply(j)}).catch(function(){}).then(function(){if(T.on&&T.code===code)T.loop=setTimeout(tPoll,document.hidden?4000:1500)})}
+function tApply(j){var now=Date.now(),novo=false,cs=$("ctvs");
+if(j.ts!==T.ts){T.ts=j.ts;T.tch=now;novo=true}
+if(now-T.tch>=12000){if(!T.off){T.off=1;msg("A TV parou de responder. A página da TV está aberta?")}if(cs)cs.textContent="TV sem resposta";return}
+T.off=0;if(!cur)return;
+if(now<T.grace&&j.id!==cur.id)return;
+if(j.id&&j.id!==cur.id)tAdota(j);
+else if(j.id&&j.t&&cur.t===cur.id)setT(j.t);
+if(novo){var antes=M.ps;M.ps=j.ps;M.ct=j.ct||0;M.du=j.du||M.du||0;
+if(antes!==0&&j.ps===0){salvarPos(true);want=false;try{a.pause()}catch(e){}}}
+var nm={"-1":"Parado","0":"Terminou","1":"Tocando","2":"Pausado","3":"Carregando","5":"Pronto"};
+if(cs)cs.textContent=j.er?"Erro no vídeo ("+j.er+")":(nm[String(M.ps)]||"")}
+function tAdota(j){var q=fila(),nx=q&&q.l[q.i+1];
+if(nx&&nx.id===j.id){q.i++;cur={id:nx.id,t:nx.t||j.t||nx.id}}else{Q=null;cur={id:j.id,t:j.t||j.id}}
+M.ct=0;M.du=0;M.fin=null;RES=null;
+S.hist=[{id:cur.id,t:cur.t,c:""}].concat(S.hist.filter(function(h){return h.id!=cur.id})).slice(0,40);save();
+$("pt").textContent=cur.t;want=true;try{a.play().catch(function(){})}catch(e){}
+setMeta();var n=tNext();tSend({a:"nxt",ni:n.ni,nt:n.nt})}
+
+/* tocar na TV */
+function castPlay(id,t,zero,pos){cur={id:id,t:t||id};
+S.hist=[{id:id,t:cur.t,c:""}].concat(S.hist.filter(function(h){return h.id!=id})).slice(0,40);save();
+if(zero)delete S.pos[id];
+var s=pos!=null?pos:(zero?0:st0(id));RES=null;
+kill();$("pw").innerHTML=CTV;$("pt").textContent=cur.t;full();
+want=true;try{a.play().catch(function(){})}catch(e){}
+M.ps=3;M.ct=s;M.du=0;T.grace=Date.now()+5000;
+var n=tNext();tSend({a:"load",id:id,t:tCut(cur.t),s:Math.floor(s),ni:n.ni,nt:n.nt});
+setMeta();var cs=$("ctvs");if(cs)cs.textContent="Carregando";
+if(!t)fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)).then(function(r){return r.json()}).then(function(j){if(cur&&cur.id==id)setT(j.title)}).catch(function(){})}
+
+/* ligação com o player existente: quando conectado, tudo vai para a TV */
+var play0=play;play=function(id,t,zero){return T.on?castPlay(id,t,zero):play0(id,t,zero)};
+var fechar0=fechar;fechar=function(){if(T.on)tSend({a:"stop"});fechar0()};
+var cmd0=cmd;cmd=function(f,args){if(!T.on)return cmd0(f,args);
+if(f=="playVideo"){M.ps=1;tSend({a:"play"})}
+else if(f=="pauseVideo"){M.ps=2;tSend({a:"pause"})}
+else if(f=="seekTo"){var s=Math.max(0,+(args&&args[0])||0);M.ct=s;tSend({a:"seek",s:Math.floor(s)})}};
+var setMeta0=setMeta;setMeta=function(){setMeta0();
+if(T.on&&cur&&("mediaSession" in navigator))try{navigator.mediaSession.setActionHandler("play",function(){nativeToggle(true)});navigator.mediaSession.setActionHandler("pause",function(){nativeToggle(false)})}catch(e){}};
+tUi();
 </script></body></html>
