@@ -464,7 +464,7 @@ function tNext(){var q=fila(),nx=q&&q.l[q.i+1];return nx?{ni:nx.id,nt:tCut(nx.t)
 /* textos e botões */
 var CTV='<div id="ctv"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="12.5" rx="2"/><path d="M8 21h8M12 17.5V21"/></svg><b>Transmitindo para a TV</b><small id="ctvs"></small></div>';
 function tUi(){var on=T.on,s=$("tvs");
-if(s)s.textContent=on?"Conectado à TV "+tFmtCod(T.code)+". Tudo que você tocar vai para a TV.":"Na TV, abra https://thxdeveloper.github.io/YouTPremium_byrbf/tv.html e digite aqui o código que aparecer.";
+if(s)s.textContent=on?"Conectado à TV "+tFmtCod(T.code)+". Tudo que você tocar vai para a TV.":"Na TV, abra https://ytpremium-rbfdev.rbfr3.workers.dev/tv e digite aqui o código que aparecer.";
 $("tvc").textContent=on?"Trocar de TV":"Conectar à TV";$("tvd").style.display=on?"":"none";
 $("bt").classList.toggle("on",on);document.body.classList.toggle("casting",on);
 $("bq").lastChild.textContent=T.q=="auto"?(QS[T.qa]?"Auto · "+QS[T.qa]:"Auto"):T.q=="max"?"Máxima":(QS[T.q]||T.q);$("bc").lastChild.textContent=T.cc?"Ligadas":"Desligadas";var zt=$("bz").lastChild;if(zt&&zt.nodeType==3)zt.textContent=on?"Tela da TV":"Tela cheia";$("bkc").lastChild.textContent=T.ctl?"Visíveis":"Ocultos";$("btl").textContent=on?"Transmitindo para a TV":"Transmitir para a TV"}
