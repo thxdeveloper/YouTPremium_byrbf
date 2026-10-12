@@ -464,19 +464,55 @@ function tNext(){var q=fila(),nx=q&&q.l[q.i+1];return nx?{ni:nx.id,nt:tCut(nx.t)
 /* textos e botões */
 var CTV='<div id="ctv"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="12.5" rx="2"/><path d="M8 21h8M12 17.5V21"/></svg><b>Transmitindo para a TV</b><small id="ctvs"></small></div>';
 function tUi(){var on=T.on,s=$("tvs");
-if(s)s.textContent=on?"Conectado à TV "+tFmtCod(T.code)+". Tudo que você tocar vai para a TV.":"Na TV, abra https://ytpremium-rbfdev.rbfr3.workers.dev/tv e digite aqui o código que aparecer.";
+if(s)s.textContent=on?"Conectado à TV "+tFmtCod(T.code)+". Tudo que você tocar vai para a TV.":"Na TV, abra https://ytpremium-rbfdev.rbfr3.workers.dev/tv e digite aqui o código ou leia o QR code.";
 $("tvc").textContent=on?"Trocar de TV":"Conectar à TV";$("tvd").style.display=on?"":"none";
 $("bt").classList.toggle("on",on);document.body.classList.toggle("casting",on);
 $("bq").lastChild.textContent=T.q=="auto"?(QS[T.qa]?"Auto · "+QS[T.qa]:"Auto"):T.q=="max"?"Máxima":(QS[T.q]||T.q);$("bc").lastChild.textContent=T.cc?"Ligadas":"Desligadas";var zt=$("bz").lastChild;if(zt&&zt.nodeType==3)zt.textContent=on?"Tela da TV":"Tela cheia";$("bkc").lastChild.textContent=T.ctl?"Visíveis":"Ocultos";$("btl").textContent=on?"Transmitindo para a TV":"Transmitir para a TV"}
 
 /* janelas */
-var sh0=sh;sh=function(t){var n=$("shn");n.inputMode="";n.removeAttribute("maxlength");sh0(t)};
+var sh0=sh;sh=function(t){var n=$("shn");n.inputMode="";n.removeAttribute("maxlength");var q=$("shqr");if(q)q.style.display="none";sh0(t)};
 function tDialog(){dlg("Código que aparece na TV","000 000",T.last?tFmtCod(T.last):"","Conectar",function(v){tConectar(String(v||"").replace(/\D/g,""))});
-var n=$("shn");n.inputMode="numeric";n.maxLength=7}
+var n=$("shn");n.inputMode="numeric";n.maxLength=7;tQrBtn()}
 function tMenu(){menu("Transmitindo para a TV "+tFmtCod(T.code),[
 {l:"Voltar a tocar no celular",f:function(){tDesconectar(true,true)}},
 {l:"Parar e desconectar",f:function(){tDesconectar(false,true)}},
 {l:"Trocar de TV (outro código)",f:tDialog}])}
+/* leitura do QR code da TV (a TV mostra ytp:123456) */
+var QR={st:null,tm:0,dec:null,on:0,el:null};
+function qrCod(s){var m=/^(?:ytp:)?(\d{6})$/i.exec(String(s||"").replace(/\s+/g,""));return m?m[1]:""}
+function qrJs(src){return new Promise(function(ok){var w=src.videoWidth||src.naturalWidth||src.width,h=src.videoHeight||src.naturalHeight||src.height;if(!w||!h)return ok("");
+var k=Math.min(1,900/Math.max(w,h)),cw=Math.round(w*k),ch=Math.round(h*k),c=QR.cv||(QR.cv=document.createElement("canvas"));c.width=cw;c.height=ch;
+var g=c.getContext("2d");g.drawImage(src,0,0,cw,ch);var d=g.getImageData(0,0,cw,ch),r=window.jsQR(d.data,cw,ch,{inversionAttempts:"dontInvert"});ok(r?r.data:"")})}
+function qrDec(){if(QR.dec)return QR.dec;
+return QR.dec=new Promise(function(ok){
+function js(){if(window.jsQR)return ok(qrJs);var s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";s.onload=function(){ok(window.jsQR?qrJs:null)};s.onerror=function(){ok(null)};document.head.appendChild(s)}
+if(window.BarcodeDetector){try{var d=new BarcodeDetector({formats:["qr_code"]});
+var t=function(src){return d.detect(src).then(function(r){return r&&r.length?r[0].rawValue:""})};
+if(BarcodeDetector.getSupportedFormats)return BarcodeDetector.getSupportedFormats().then(function(f){if(f.indexOf("qr_code")>=0)ok(t);else js()},js);
+return ok(t)}catch(e){}}
+js()})}
+function qrFecha(){QR.on=0;clearTimeout(QR.tm);if(QR.st){QR.st.getTracks().forEach(function(t){t.stop()});QR.st=null}var v=$("qrv");if(v)v.srcObject=null;if(QR.el)QR.el.style.display="none"}
+function qrFim(c){qrFecha();$("sh").style.display="none";try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}tConectar(c)}
+function qrLoop(){clearTimeout(QR.tm);if(!QR.on||!QR.st)return;var v=$("qrv");function nx(){QR.tm=setTimeout(qrLoop,250)}
+if(v.readyState<2||!v.videoWidth)return nx();
+qrDec().then(function(f){if(!f){QR.dec=null;$("qrm").textContent="Leitor de QR indisponível agora (sem internet?). Digite o código.";return}
+return f(v).then(function(r){var c=qrCod(r);if(c)qrFim(c);else nx()})}).catch(nx)}
+function qrUi(){if(QR.el)return QR.el;var o=document.createElement("div");QR.el=o;o.id="qrs";
+o.style.cssText="position:fixed;inset:0;z-index:90;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px";
+o.innerHTML='<video id="qrv" playsinline muted style="width:100%;max-width:420px;max-height:55vh;object-fit:cover;border-radius:18px;background:#111"></video><div id="qrm" style="margin:16px 0 10px;font-size:15px;min-height:40px"></div><button id="qrp" style="width:100%;max-width:420px;margin-bottom:8px">Tirar foto do QR</button><button id="qrc" style="width:100%;max-width:420px">Cancelar</button><input type="file" id="qrf" accept="image/*" capture="environment" style="display:none">';
+document.body.appendChild(o);
+$("qrc").onclick=qrFecha;$("qrp").onclick=function(){$("qrf").click()};
+$("qrf").onchange=function(){var f=this.files&&this.files[0];this.value="";if(!f)return;$("qrm").textContent="Lendo a foto...";var im=new Image(),u=URL.createObjectURL(f);
+im.onerror=function(){$("qrm").textContent="Não consegui abrir a foto."};
+im.onload=function(){qrDec().then(function(d){if(!d){QR.dec=null;$("qrm").textContent="Leitor de QR indisponível agora (sem internet?). Digite o código.";return}
+return d(im).then(function(r){URL.revokeObjectURL(u);var c=qrCod(r);if(c)qrFim(c);else $("qrm").textContent="Não achei o QR na foto. Chegue mais perto, deixe reto e tente de novo."})}).catch(function(){$("qrm").textContent="Não consegui ler a foto."})};im.src=u};
+return o}
+function qrAbrir(){var o=qrUi(),v=$("qrv");o.style.display="flex";QR.on=1;$("qrm").textContent="Aponte a câmera para o QR code que aparece na TV.";
+if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){v.style.display="none";$("qrm").textContent="Câmera ao vivo indisponível aqui. Toque em Tirar foto do QR.";return}
+v.style.display="";
+navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false}).then(function(s){if(!QR.on){s.getTracks().forEach(function(t){t.stop()});return}
+QR.st=s;v.srcObject=s;var p=v.play();if(p&&p.catch)p.catch(function(){});qrLoop()}).catch(function(){v.style.display="none";$("qrm").textContent="Não consegui abrir a câmera ao vivo. Toque em Tirar foto do QR ou digite o código."})}
+function tQrBtn(){var b=$("shqr");if(!b){b=document.createElement("button");b.id="shqr";b.textContent="Ler QR code da TV";b.style.cssText="width:100%;margin:0 0 6px";b.onclick=qrAbrir;$("shb").appendChild(b)}b.style.display=""}
 $("bt").onclick=function(e){e.stopPropagation();T.on?tMenu():tDialog()};
 $("tvc").onclick=tDialog;
 $("bq").onclick=function(e){e.stopPropagation();tOld();var av=T.ql?T.ql.split(","):["hd1080","hd720","large","medium"];
@@ -499,7 +535,7 @@ function tConectar(c){if(c.length!==6)return msg("Digite os 6 números que apare
 msg("Procurando a TV…");
 tReq("GET","/salas/"+c+"/tv").then(function(j){
 if(!j)return msg("Não encontrei esse código. A página da TV está aberta? Confira os números.");
-if(T.on){tSend({a:"stop"});tParaTimers()}
+if(T.on){tSend({a:"stop",d:1});tParaTimers()}
 T.on=true;T.code=c;T.last=c;try{localStorage.setItem("vtv",c)}catch(e){}
 T.ts=j.ts;T.tch=Date.now();T.off=0;T.grace=0;
 tIniciaTimers();tSend({a:"hi",ch:S.chr||"none",q:T.q,cc:T.cc,ctl:T.ctl});tUi();
@@ -511,7 +547,7 @@ T.hb=setInterval(function(){tSend({a:"hi"})},40000);
 T.tick=setInterval(function(){if(T.on&&cur&&M.ps==1&&M.du)M.ct=Math.min(M.du,(M.ct||0)+1)},1000)}
 function tParaTimers(){clearTimeout(T.loop);clearInterval(T.hb);clearInterval(T.tick)}
 function tDesconectar(resume,stop){if(!T.on)return;var code=T.code,pos=Math.floor(M.ct||0),ps=M.ps;
-if(stop){T.n=Math.max(Date.now(),T.n+1);tReq("PUT","/salas/"+code+"/cmd",{a:"stop",n:T.n}).catch(function(){})}
+if(stop){T.n=Math.max(Date.now(),T.n+1);tReq("PUT","/salas/"+code+"/cmd",{a:"stop",d:1,n:T.n}).catch(function(){})}
 T.on=false;tParaTimers();tUi();
 if(resume&&cur&&ps!==0){if(pos>5){S.pos[cur.id]=pos;savePos()}play0(cur.id,cur.t)}
 else if(cur)fechar0();
