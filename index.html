@@ -158,8 +158,17 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 <div class="gh">Tema</div>
 <div class="tms" id="tms"></div>
 <div class="gh">Busca no YouTube</div>
-<div class="sub">Chaves da API do YouTube, uma por linha. Ficam só neste aparelho.</div>
-<textarea id="ks" rows="4"></textarea>
+<div class="sub">Para pesquisar vídeos o app precisa de uma chave gratuita da API do YouTube. Ela fica só neste aparelho.</div>
+<details id="kg" class="sub" style="margin-top:0"><summary style="cursor:pointer;font-weight:700">Como conseguir a chave (passo a passo)</summary>
+<ol style="margin:8px 0 0;padding-left:20px">
+<li>Acesse <b>console.cloud.google.com</b> e entre com sua conta Google.</li>
+<li>Crie um projeto (menu no topo &gt; <b>Novo projeto</b>).</li>
+<li>Vá em <b>APIs e serviços &gt; Biblioteca</b>, procure <b>YouTube Data API v3</b> e toque em <b>Ativar</b>.</li>
+<li>Vá em <b>APIs e serviços &gt; Credenciais &gt; Criar credenciais &gt; Chave de API</b>.</li>
+<li>Copie a chave (começa com <b>AIza</b>) e cole no campo abaixo.</li>
+</ol>
+<div style="margin-top:8px">Cada chave tem um limite diário gratuito. Você pode cadastrar <b>várias chaves</b> (de projetos diferentes): quando uma chave atingir o limite, o app tenta a próxima sozinho. Ao verificar uma chave, aparece um novo campo para a próxima.</div></details>
+<div id="kl"></div>
 <button class="pri" id="tk">Testar chaves</button><div id="ko" class="sub"></div>
 <input id="ch" type="hidden">
 <div class="gh">Transmitir para a TV</div>
@@ -312,13 +321,19 @@ $("bp").onclick=function(){if(window.Android&&Android.miniatura)Android.miniatur
 function mostraBk(t){var a=$("bkt");a.style.display="block";a.value=t;a.select();msg("Copie o texto da caixa e guarde em lugar seguro.")}
 $("bk").onclick=function(){var d=JSON.parse(JSON.stringify(S,function(k,v){return k=="bq"?undefined:v}));delete d.chr;var o={app:"vm-backup",versao:1,data:new Date().toISOString(),dados:d};var t=JSON.stringify(o,null,1);
 try{var b=new Blob([t],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);msg("Backup exportado em arquivo .json.")}catch(e){mostraBk(t)}};
-function restauraBk(txt){try{var d=JSON.parse(txt);if(d&&d.dados&&typeof d.dados=="object")d=d.dados;if(!d||typeof d!="object"||!Array.isArray(d.favs))throw 0;Object.assign(S,d);S.chr="-";S.pos=S.pos||{};S.hist=S.hist||[];S.cnt=S.cnt||{};if(!Array.isArray(S.keys))S.keys=[];save();savePos();saveC();saveF();var a=$("bkt");a.style.display="none";a.value="";$("ks").value=S.keys.join("\n");$("ch").value=S.chr;cont();favs();msg("Backup restaurado.")}catch(e){msg("Backup inválido. Escolha o arquivo .json exportado pelo app.")}}
+function restauraBk(txt){try{var d=JSON.parse(txt);if(d&&d.dados&&typeof d.dados=="object")d=d.dados;if(!d||typeof d!="object"||!Array.isArray(d.favs))throw 0;Object.assign(S,d);S.chr="-";S.pos=S.pos||{};S.hist=S.hist||[];S.cnt=S.cnt||{};if(!Array.isArray(S.keys))S.keys=[];save();savePos();saveC();saveF();var a=$("bkt");a.style.display="none";a.value="";renderKeys();$("ch").value=S.chr;cont();favs();msg("Backup restaurado.")}catch(e){msg("Backup inválido. Escolha o arquivo .json exportado pelo app.")}}
 $("rs").onclick=function(){var a=$("bkt");if(a.style.display=="block"&&a.value.trim())return restauraBk(a.value);$("bkf").value="";$("bkf").click()};
 $("bkf").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){restauraBk(r.result)};r.onerror=function(){msg("Não foi possível ler o arquivo.")};r.readAsText(f)};
 window.onPip=function(b){document.body.classList.toggle("pip",b)};
 /* ---- ajustes ---- */
-$("ks").value=S.keys.join("\n");$("ch").value=S.chr;
-$("ks").onchange=function(){S.keys=this.value.split("\n").map(function(k){return k.trim()}).filter(Boolean);save()};
+$("ch").value=S.chr;
+async function kCheck(k){try{var r=await(await fetch("https://www.googleapis.com/youtube/v3/videos?part=id&id=dQw4w9WgXcQ&key="+encodeURIComponent(k))).json();if(!r.error)return{ok:true};var m=r.error.message||"";var q=(r.error.errors||[]).some(function(e){return e.reason=="quotaExceeded"||e.reason=="rateLimitExceeded"});if(q)return{ok:true,note:"válida (limite de hoje atingido)"};return{ok:false,note:/API key not valid|keyInvalid/i.test(m)||(r.error.errors||[]).some(function(e){return e.reason=="badRequest"})?"chave inválida":m.slice(0,60)}}catch(e){return{ok:false,note:"sem conexão"}}}
+function kSave(){var l=[];$("kl").querySelectorAll("input").forEach(function(i){if(i.dataset.v)l.push(i.dataset.v)});S.keys=l;save()}
+function kRow(v){var w=document.createElement("div"),i=document.createElement("input"),t=document.createElement("div");i.type="text";i.placeholder="Cole aqui uma chave da API";i.autocomplete="off";i.spellcheck=false;i.autocapitalize="off";i.value=v;i.dataset.v=v;i.style.marginBottom="0";t.className="sub";t.style.margin="4px 4px 0";t.textContent=v?"✓ verificada":"";w.appendChild(i);w.appendChild(t);$("kl").appendChild(w);
+i.onchange=async function(){var val=i.value.trim();i.value=val;if(!val){i.dataset.v="";t.textContent="";kSave();var rows=$("kl").children;if(rows.length>1&&w!=rows[rows.length-1])w.remove();return}
+t.textContent="verificando…";var r=await kCheck(val);if(i.value.trim()!=val)return;if(r.ok){i.dataset.v=val;t.textContent="✓ "+(r.note||"verificada");kSave();var rows=$("kl").children;if(w==rows[rows.length-1])kRow("")}else{i.dataset.v="";t.textContent="✗ "+r.note+" — confira e cole de novo";kSave()}}}
+function renderKeys(){$("kl").innerHTML="";S.keys.forEach(kRow);kRow("")}
+renderKeys();
 
 $("tk").onclick=async function(){var o=$("ko");o.innerHTML="";if(!S.keys.length){o.textContent="Nenhuma chave cadastrada.";return}
 for(var i=0;i<S.keys.length;i++){var d=document.createElement("div"),k=S.keys[i];o.appendChild(d);d.textContent="Chave "+(i+1)+" (…"+k.slice(-4)+"): testando…";
