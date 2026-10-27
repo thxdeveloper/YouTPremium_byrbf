@@ -161,13 +161,13 @@ body::before{content:"";position:fixed;left:0;right:0;top:50%;height:min(134.7vw
 <div class="sub">Chaves da API do YouTube, uma por linha. Ficam só neste aparelho.</div>
 <textarea id="ks" rows="4"></textarea>
 <button class="pri" id="tk">Testar chaves</button><div id="ko" class="sub"></div>
-<div class="sub">Caractere do endereço (opcional)</div><input id="ch" maxlength="5">
+<input id="ch" type="hidden">
 <div class="gh">Transmitir para a TV</div>
 <div class="sub" id="tvs"></div>
 <div class="row2"><button class="pri" id="tvc">Conectar à TV</button><button class="sec" id="tvd" style="display:none">Desconectar</button></div>
 <div class="gh">Dados</div>
 <div class="sub" id="us"></div><button id="lc" class="sec" style="width:100%;margin-top:6px">Limpar cache de buscas</button>
-<div class="sub">Backup dos seus dados (playlists, posições e chaves)</div><div class="row2"><button class="pri" id="bk">Copiar backup</button><button class="sec" id="rs">Restaurar</button></div>
+<div class="sub">Backup dos seus dados (playlists, histórico, posições e chaves) em arquivo .json</div><div class="row2"><button class="pri" id="bk">Exportar backup</button><button class="sec" id="rs">Restaurar</button></div><input type="file" id="bkf" accept=".json,application/json" style="display:none">
 <textarea id="bkt" rows="4" placeholder="Cole aqui o backup e toque em Restaurar" style="display:none"></textarea>
 <div class="gh">Sobre</div>
 <div class="ab"><div class="ah"><img src="icon-192.png" alt=""><div><b>YT Premium</b><span>Beta Fechado</span></div></div>
@@ -191,7 +191,7 @@ try{Object.assign(S,JSON.parse(localStorage.getItem("vm")||"{}"))}catch(e){}
 try{var o1=JSON.parse(localStorage.getItem("vp")||"{}");if(o1.pos)S.pos=o1.pos;if(o1.last!==undefined)S.last=o1.last}catch(e){}
 try{var o2=JSON.parse(localStorage.getItem("vc")||"{}");if(o2.bq)S.bq=o2.bq}catch(e){}
 S.hist=S.hist||[];S.cnt=S.cnt||{};S.bq=S.bq||{};S.qh=S.qh||[];
-S.pos=S.pos||{};if(S.fill===undefined)S.fill=true;var Q=null,fc="",RES=null;
+S.chr="-";S.pos=S.pos||{};if(S.fill===undefined)S.fill=true;var Q=null,fc="",RES=null;
 function save(){try{localStorage.setItem("vm",JSON.stringify(S))}catch(e){msg("Não foi possível salvar neste navegador.")}}
 function msg(t){var e=$("msg");e.textContent=t;e.style.opacity=1;clearTimeout(msg.t);msg.t=setTimeout(function(){e.style.opacity=0},3800)}
 function dec(s){var t=document.createElement("textarea");t.innerHTML=s;return t.value}
@@ -310,14 +310,16 @@ function prog(pl){if(window.Android&&cur)try{Android.setProgress(Math.floor(M.ct
 setInterval(prog,3000);
 $("bp").onclick=function(){if(window.Android&&Android.miniatura)Android.miniatura();else msg("A miniatura só funciona no app instalado.")};
 function mostraBk(t){var a=$("bkt");a.style.display="block";a.value=t;a.select();msg("Copie o texto da caixa e guarde em lugar seguro.")}
-$("bk").onclick=function(){var t=JSON.stringify(S,function(k,v){return k=="bq"?undefined:v});if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){msg("Backup copiado. Cole em um lugar seguro, como Notas ou Telegram.")},function(){mostraBk(t)});else mostraBk(t)};
-$("rs").onclick=function(){var a=$("bkt");if(a.style.display!="block"||!a.value.trim()){a.style.display="block";a.value="";a.focus();msg("Cole o backup na caixa e toque em Restaurar de novo.");return}
-try{var d=JSON.parse(a.value);if(!d||typeof d!="object"||!Array.isArray(d.favs))throw 0;Object.assign(S,d);S.pos=S.pos||{};if(!Array.isArray(S.keys))S.keys=[];save();savePos();saveC();a.style.display="none";a.value="";$("ks").value=S.keys.join("\n");$("ch").value=S.chr||"";cont();favs();msg("Backup restaurado.")}catch(e){msg("Backup inválido. Confira se colou o texto inteiro.")}};
+$("bk").onclick=function(){var d=JSON.parse(JSON.stringify(S,function(k,v){return k=="bq"?undefined:v}));delete d.chr;var o={app:"vm-backup",versao:1,data:new Date().toISOString(),dados:d};var t=JSON.stringify(o,null,1);
+try{var b=new Blob([t],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);msg("Backup exportado em arquivo .json.")}catch(e){mostraBk(t)}};
+function restauraBk(txt){try{var d=JSON.parse(txt);if(d&&d.dados&&typeof d.dados=="object")d=d.dados;if(!d||typeof d!="object"||!Array.isArray(d.favs))throw 0;Object.assign(S,d);S.chr="-";S.pos=S.pos||{};S.hist=S.hist||[];S.cnt=S.cnt||{};if(!Array.isArray(S.keys))S.keys=[];save();savePos();saveC();saveF();var a=$("bkt");a.style.display="none";a.value="";$("ks").value=S.keys.join("\n");$("ch").value=S.chr;cont();favs();msg("Backup restaurado.")}catch(e){msg("Backup inválido. Escolha o arquivo .json exportado pelo app.")}}
+$("rs").onclick=function(){var a=$("bkt");if(a.style.display=="block"&&a.value.trim())return restauraBk(a.value);$("bkf").value="";$("bkf").click()};
+$("bkf").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){restauraBk(r.result)};r.onerror=function(){msg("Não foi possível ler o arquivo.")};r.readAsText(f)};
 window.onPip=function(b){document.body.classList.toggle("pip",b)};
 /* ---- ajustes ---- */
 $("ks").value=S.keys.join("\n");$("ch").value=S.chr;
 $("ks").onchange=function(){S.keys=this.value.split("\n").map(function(k){return k.trim()}).filter(Boolean);save()};
-$("ch").oninput=function(){S.chr=this.value;save()};
+
 $("tk").onclick=async function(){var o=$("ko");o.innerHTML="";if(!S.keys.length){o.textContent="Nenhuma chave cadastrada.";return}
 for(var i=0;i<S.keys.length;i++){var d=document.createElement("div"),k=S.keys[i];o.appendChild(d);d.textContent="Chave "+(i+1)+" (…"+k.slice(-4)+"): testando…";
 try{var r=await(await fetch("https://www.googleapis.com/youtube/v3/videos?part=id&id=dQw4w9WgXcQ&key="+encodeURIComponent(k))).json();d.textContent="Chave "+(i+1)+" (…"+k.slice(-4)+"): "+(r.error?r.error.message.slice(0,70):"funcionando")}catch(e){d.textContent="Chave "+(i+1)+": sem conexão"}}};
