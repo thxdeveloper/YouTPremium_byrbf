@@ -196,24 +196,24 @@ nav button.on::after{content:"";position:absolute;left:50%;bottom:0;width:34px;h
 .lr+.lr{border-top:1px solid var(--line)}
 .lr svg{flex:none;color:var(--ac)}.lr span{flex:1}.lr svg.cv{color:var(--mut)}
 /* ===== v6: perfil no menu (anel dourado) e favoritos ===== */
-nav .navav{display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin:-2px auto 1px;border-radius:50%;overflow:hidden;box-sizing:border-box;border:1.5px solid #f3d98b;background:var(--card);color:var(--mut);font-size:13px;font-weight:800;font-style:normal;box-shadow:0 0 0 .5px #b8892a99,0 0 6px 1px #f6d77a99,0 0 12px 2px #e2b04f44;animation:brilhoOuro 3.8s ease-in-out infinite}
-nav button.on .navav{border-color:#ffe08a}
-nav .navav img{width:100%;height:100%;object-fit:cover;display:block}
-nav .navav svg{width:62%;height:62%;margin:0}
-@keyframes brilhoOuro{0%,100%{box-shadow:0 0 0 .5px #b8892a99,0 0 6px 1px #f6d77a99,0 0 12px 2px #e2b04f44}50%{box-shadow:0 0 0 .5px #c99a35cc,0 0 9px 2px #ffe49a,0 0 20px 4px #e2b04f77}}
-@media (prefers-reduced-motion:reduce){nav .navav{animation:none}}
 #bfv.on{border-color:var(--ac)}
 .hc.v span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px}
+.hav{position:relative;margin-left:auto;flex:none;margin-top:4px;width:48px;height:48px;padding:2px;border:0;border-radius:50%;overflow:hidden;background:#d9a83c;box-shadow:0 0 12px #f4c15277,0 0 2px #fff8 inset;color:var(--mut)}
+.hav::before{content:"";position:absolute;inset:-60%;background:conic-gradient(from 0deg,#b8861f,#f9e4a0,#f4c152,#fff7d6,#c9962b,#f9e4a0,#b8861f);animation:giro 5s linear infinite}
+.hav .in{position:relative;z-index:1;width:100%;height:100%;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--card);border:2px solid var(--bg);font-size:18px;font-weight:800}
+.hav .in img{width:100%;height:100%;object-fit:cover}
+.hav .in svg{width:60%;height:60%}
+@keyframes giro{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.hav::before{animation:none}}
+.hd .hav{margin-top:0}
 </style></head><body>
 <main>
-<section class="tab on" id="tb"><div class="brand"><div class="bn"><b><i>YT</i> Premium</b><small id="tgl">Seu conteúdo favorito,<br>sem limites.</small></div></div>
+<section class="tab on" id="tb"><div class="brand"><div class="bn"><b><i>YT</i> Premium</b><small id="tgl">Seu conteúdo favorito,<br>sem limites.</small></div><button class="hav" id="hav" aria-label="Perfil"></button></div>
 <div class="sb"><input id="q" type="search" enterkeyhint="search" placeholder="Nome, link do vídeo ou de playlist"><button id="qx" aria-label="Limpar busca">✕</button></div>
 <button class="pri" id="go">Buscar ou reproduzir</button><div id="qh"></div><div id="res"></div><div id="hm"></div></section>
-<section class="tab" id="tf"><h1>Reproduzir</h1><div id="cont"></div><div id="fl"></div></section>
-<section class="tab" id="ta"><div class="hd"><button class="bk" id="cfb" aria-label="Voltar"></button><h1>Configuração</h1></div>
-<div class="gh f">Perfil</div>
-<div class="pf"><button class="av" id="av" aria-label="Escolher foto da galeria"></button><input id="nm" maxlength="24" placeholder="Nome de usuário" autocomplete="off" aria-label="Nome de usuário"><div class="row2"><button class="sec" id="bgal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 9"/></svg>Galeria</button><button class="sec" id="bcam"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.2"/></svg>Câmera</button></div><button class="lk" id="fre" style="display:none">Remover foto</button><input type="file" id="fi" accept="image/*" style="display:none"><input type="file" id="fci" accept="image/*" capture="user" style="display:none"></div>
-<div class="gh">Tema</div>
+<section class="tab" id="tf"><div class="hd" style="justify-content:space-between"><h1>Reproduzir</h1><button class="hav" id="hav2" aria-label="Perfil"></button></div><div id="cont"></div><div id="fl"></div></section>
+<section class="tab" id="ta"><h1>Configuração</h1>
+<div class="gh f">Tema</div>
 <div class="tms" id="tms"></div>
 <div class="gh">Busca no YouTube</div>
 <div class="sub">Para pesquisar vídeos o app precisa de uma chave gratuita da API do YouTube. Ela fica só neste aparelho.</div>
@@ -242,9 +242,8 @@ nav .navav svg{width:62%;height:62%;margin:0}
 <div class="af">Copyright © RBF R3. Todos os direitos reservados.</div></div>
 <div class="sub" id="dg"></div></section>
 <section class="tab" id="tpf"><div class="hd"><button class="bk" id="pfb" aria-label="Voltar"></button><h1>Perfil</h1></div>
-<div class="pfh"><div class="av2" id="av2"></div><b id="nm2"></b></div>
-<div class="row2"><button class="sec" id="pfe" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700"></button></div>
-<div class="lst" id="pfl1"></div><div class="lst" id="pfl2"></div></section>
+<div class="pf"><button class="av" id="av" aria-label="Escolher foto da galeria"></button><input id="nm" maxlength="24" placeholder="Nome de usuário" autocomplete="off" aria-label="Nome de usuário"><div class="row2"><button class="sec" id="bgal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 9"/></svg>Galeria</button><button class="sec" id="bcam"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.2"/></svg>Câmera</button></div><button class="lk" id="fre" style="display:none">Remover foto</button><input type="file" id="fi" accept="image/*" style="display:none"><input type="file" id="fci" accept="image/*" capture="user" style="display:none"></div>
+<div class="lst" id="pfl1"></div></section>
 <section class="tab" id="th"><div class="hd"><button class="bk" id="hb" aria-label="Voltar"></button><h1>Histórico</h1></div>
 <div id="hl"></div><button class="sec" id="hc2" style="width:100%;margin:14px 0">Limpar histórico</button></section>
 </main>
@@ -257,7 +256,7 @@ nav .navav svg{width:62%;height:62%;margin:0}
 <div id="sh"><div id="shb"><b>Salvar em qual playlist?</b><div id="shl" style="margin-top:8px"></div><input id="shn" placeholder="Ou crie uma nova playlist"><button class="pri" id="shk">Salvar</button></div></div>
 <div id="fbs"><button id="fp" aria-label="Anterior"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button><button id="fb" aria-label="Preencher tela"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button id="fn" aria-label="Próximo"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button></div>
 <div id="msg"></div>
-<nav><button data-t="b" class="on"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Buscar</button><button data-t="f"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg>Reproduzir</button><button data-t="pf" aria-label="Perfil"><i class="navav" id="hav"></i>Perfil</button></nav>
+<nav><button data-t="b" class="on"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Buscar</button><button data-t="f"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg>Reproduzir</button><button data-t="a"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configuração</button></nav>
 <script>
 var $=function(i){return document.getElementById(i)},S={favs:[],keys:[],chr:""},R=[],cur=null,want=false,P=null,pend=null;
 try{Object.assign(S,JSON.parse(localStorage.getItem("vm")||"{}"))}catch(e){}
@@ -720,8 +719,9 @@ d.querySelector("img").src="https://i.ytimg.com/vi/"+id+"/mqdefault.jpg";d.query
 /* aba Reproduzir: ícones nos botões */
 var favs0=favs;favs=function(){favs0.apply(this,arguments);document.querySelectorAll("#fl .row2 button").forEach(function(b){var t=b.textContent.trim();if(t.indexOf("▶")==0)b.innerHTML=sv(P.play,18,true)+"<span>"+t.replace("▶","").trim()+"</span>";else if(t=="Aleatório")b.innerHTML=sv(P.shuf,18)+"<span>Aleatório</span>"})};
 /* avatar do topo */
-function avTo(el){el.innerHTML="";var n=(S.nome||"").trim(),ini=n.charAt(0).toUpperCase();if(S.foto){var i=document.createElement("img");i.alt="";i.src=S.foto;el.appendChild(i)}else if(ini)el.textContent=ini;else el.innerHTML=ICP}
-var pf0=perfil;perfil=function(){pf0.apply(this,arguments);avTo($("hav"));if($("av2")){avTo($("av2"));$("nm2").textContent=(S.nome||"").trim()||"Seu perfil"}};
+function avTo(el){el.innerHTML="";var t=el;if(el.classList.contains("hav")){t=document.createElement("span");t.className="in";el.appendChild(t)}var n=(S.nome||"").trim(),ini=n.charAt(0).toUpperCase();if(S.foto){var i=document.createElement("img");i.alt="";i.src=S.foto;t.appendChild(i)}else if(ini)t.textContent=ini;else t.innerHTML=ICP}
+var pf0=perfil;perfil=function(){pf0.apply(this,arguments);avTo($("hav"));avTo($("hav2"))};
+$("hav").onclick=function(){tab("pf")};$("hav2").onclick=function(){tab("pf")};
 /* início */
 function sec(t,link,fn){var h=document.createElement("div");h.className="sh2";h.innerHTML="<b></b><a>Ver todos</a>";h.firstChild.textContent=t;h.lastChild.onclick=fn;return h}
 home=function(){var h=$("hm");h.innerHTML="";
@@ -741,13 +741,10 @@ if(!S.favs.length&&!top.length){var e=document.createElement("div");e.className=
 /* perfil */
 function rows(el,l){l.forEach(function(r){var b=document.createElement("button");b.className="lr";b.innerHTML=sv(P[r[0]],22)+"<span></span>"+sv(P.chev,18).replace("<svg ",'<svg class="cv" ');b.children[1].textContent=r[1];b.onclick=r[2];el.appendChild(b)})}
 function ir(a){tab("a");var m=document.querySelector("main");m.scrollTop=0;if(a=="ajuda"){var k=$("kg");k.open=true;setTimeout(function(){k.scrollIntoView({block:"start"})},50)}}
-function montaPerfil(){var a=$("pfl1"),b=$("pfl2");a.innerHTML="";b.innerHTML="";
-rows(a,[["clock","Histórico",function(){tab("h")}],["heart","Favoritos",function(){fc="@fav";LIM=15;tab("f")}],["list","Playlists",function(){var cs=cats();if(!cs.length){msg("Você ainda não criou playlists. Toque na estrela de um vídeo para criar.");return}menu("Playlists",cs.map(function(c){return{l:c,f:function(){fc=c;LIM=15;tab("f")}}}))}]]);
-rows(b,[["gear","Configurações",function(){ir()}],["help","Ajuda e suporte",function(){ir("ajuda")}]]);
-avTo($("av2"));$("nm2").textContent=(S.nome||"").trim()||"Seu perfil"}
-$("pfb").onclick=function(){tab("b")};$("pfe").onclick=function(){ir()};
-$("pfe").innerHTML=sv(P.edit,18)+"<span>Editar perfil</span>";
-$("pfb").innerHTML=sv(P.back,24);$("hb").innerHTML=sv(P.back,24);$("cfb").innerHTML=sv(P.back,24);$("cfb").onclick=function(){tab("pf")};
+function montaPerfil(){var a=$("pfl1");a.innerHTML="";
+rows(a,[["clock","Histórico",function(){tab("h")}],["heart","Favoritos",function(){fc="@fav";LIM=15;tab("f")}],["list","Playlists",function(){var cs=cats();if(!cs.length){msg("Você ainda não criou playlists. Toque na estrela de um vídeo para criar.");return}menu("Playlists",cs.map(function(c){return{l:c,f:function(){fc=c;LIM=15;tab("f")}}}))}]])}
+$("pfb").onclick=function(){tab(prev||"b")};
+$("pfb").innerHTML=sv(P.back,24);$("hb").innerHTML=sv(P.back,24);
 $("hb").onclick=function(){tab("pf")};
 /* histórico */
 function montaHist(){var l=$("hl");l.innerHTML="";var h=S.hist||[];$("hc2").style.display=h.length?"":"none";
@@ -755,8 +752,9 @@ if(!h.length){var e=document.createElement("div");e.className="empty";e.textCont
 h.forEach(function(f,i){var d=item(f.id,f.t,"",[{l:"☆",f:function(){fav(f.id,f.t)}}]);d.onclick=function(){Q={l:h,i:i};play(f.id,f.t)};l.appendChild(d)})}
 $("hc2").onclick=function(){dlg("Limpar todo o histórico de vídeos assistidos?",null,"","Limpar",function(){S.hist=[];save();montaHist();home();msg("Histórico limpo.")})};
 /* navegação entre as telas */
-var tab0=tab;tab=function(n){tab0(n);var m=document.querySelector("main");
-if(n=="pf"||n=="h"||n=="a"){document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t=="pf")});m.scrollTop=0}
+var prev="b";var tab0=tab;tab=function(n){tab0(n);var m=document.querySelector("main");
+if(n=="b"||n=="f"||n=="a")prev=n;
+if(n=="pf"||n=="h"||n=="a")m.scrollTop=0;
 if(n=="pf")montaPerfil();if(n=="h")montaHist();if(n=="b")home()};
 perfil();home();
 })();
